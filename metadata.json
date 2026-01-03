@@ -1,0 +1,5 @@
+{
+  "name": "Precision Label Architect",
+  "description": "A high-precision web-to-print Proof of Concept for industrial label printing using React and Tailwind.",
+  "requestFramePermissions": []
+}
