@@ -31,8 +31,8 @@
 }
 
 /* 
-  STRICT PRINT CSS: ZEBRA ZT510 IMPLEMENTATION
-  Follows "Viewport Isolation" and "@page Controller" theories.
+  STRICT PRINT CSS: ZEBRA ZT510 203DPI IMPLEMENTATION
+  Fixes excessive zoom and ensures 1:1 scale printing
 */
 @media print {
   /* 
@@ -77,14 +77,23 @@
     
     /* 
        DIMENSION STRATEGY (Dynamic Injection)
-       NOTE: We removed width/height from here.
-       They are now injected dynamically in App.tsx using a <style> tag
-       to allow the user to define custom label sizes.
+       NOTE: Width/height are injected dynamically in App.tsx
+       to allow custom label sizes.
     */
     
     /* 
+       CRITICAL FIX FOR ZEBRA ZT510 203DPI
+       Scale down from browser 96 DPI to printer 203 DPI
+       Scale factor = 96/203 = 0.473
+       This prevents the "3 pages" zoom issue
+    */
+    transform: scale(0.473) !important;
+    transform-origin: top left !important;
+    
+    /* 
        OVERFLOW GUARD
-       This is critical. If content bleeds by even 1px, browsers trigger "Shrink to Fit".
+       This is critical. If content bleeds by even 1px, 
+       browsers trigger "Shrink to Fit".
        Clipping content ensures 1:1 scale is maintained.
     */
     overflow: hidden !important;
@@ -94,14 +103,27 @@
     padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    transform: none !important; 
     background: white !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    
+    /* Force exact color printing */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   /* 
-     4. @PAGE DIRECTIVE
-     NOTE: The @page size rule is also removed from here and injected dynamically.
+     4. PREVENT BROWSER AUTO-SCALING
+     Force all elements to use exact colors and sizes
+  */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 
+     5. @PAGE DIRECTIVE
+     NOTE: The @page size rule is injected dynamically in App.tsx
+     to support custom label dimensions
   */
 }

@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import { ExcelServiceFactory } from './services/excel';
 
 export interface ParseResult {
   headers: string[]; // Returns SANITIZED headers (keys)
@@ -18,55 +18,37 @@ export const sanitizeKey = (header: string): string => {
 };
 
 export const parseExcel = async (file: File): Promise<ParseResult> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const data = e.target?.result;
-        if (!data) return;
+  try {
+    const excelService = ExcelServiceFactory.getService();
+    const result = await excelService.parseToJSON(file);
 
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        if (jsonData.length === 0) {
-          resolve({ headers: [], data: [] });
-          return;
-        }
+    if (result.data.length === 0) {
+      return { headers: [], data: [] };
+    }
 
-        // Row 0 is Headers
-        const rawHeaders = (jsonData[0] as string[]).map(h => String(h).trim());
-        
-        // CRITICAL FIX: The headers returned in the result MUST be the sanitized keys.
-        // The UI Table iterates these headers to look up values in the row objects.
-        const sanitizedHeaders = rawHeaders.map(h => sanitizeKey(h));
+    // Row 0 is Headers
+    const rawHeaders = result.headers;
 
-        const rawRows = jsonData.slice(1);
+    // CRITICAL FIX: The headers returned in the result MUST be the sanitized keys.
+    // The UI Table iterates these headers to look up values in the row objects.
+    const sanitizedHeaders = rawHeaders.map(h => sanitizeKey(h));
 
-        // DATA NORMALIZATION DOCTRINE:
-        // Convert the raw row array into an object using the SANITIZED keys.
-        // This ensures that row['material_description'] exists and matches the header 'material_description'.
-        const structuredData = rawRows.map((row: any) => {
-          const obj: Record<string, any> = {};
-          rawHeaders.forEach((_, index) => {
-            const key = sanitizedHeaders[index];
-            // If the cell is empty, store empty string instead of undefined
-            obj[key] = row[index] !== undefined ? row[index] : ""; 
-          });
-          return obj;
-        });
+    // DATA NORMALIZATION DOCTRINE:
+    // Convert the raw row array into an object using the SANITIZED keys.
+    // This ensures that row['material_description'] exists and matches the header 'material_description'.
+    const structuredData = result.data.map((row: any) => {
+      const obj: Record<string, any> = {};
+      rawHeaders.forEach((rawHeader, index) => {
+        const key = sanitizedHeaders[index];
+        // If the cell is empty, store empty string instead of undefined
+        obj[key] = row[rawHeader] !== undefined ? row[rawHeader] : "";
+      });
+      return obj;
+    });
 
-        resolve({ headers: sanitizedHeaders, data: structuredData });
+    return { headers: sanitizedHeaders, data: structuredData };
 
-      } catch (err) {
-        reject(err);
-      }
-    };
-
-    reader.onerror = (err) => reject(err);
-    reader.readAsBinaryString(file);
-  });
+  } catch (err) {
+    throw err;
+  }
 };
