@@ -1,14 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, userRepository } from './user-repository';
+import { Department, departmentRepository } from '../departments/department-repository';
 
 interface UserContextType {
   currentUser: User | null;
   users: User[];
+  departments: Department[];
   login: (user: User) => void;
   logout: () => void;
-  refreshUsers: () => void;
-  addUser: (name: string) => void;
+  refreshData: () => void;
+  addUser: (name: string, role: 'admin' | 'operator', deptId?: string) => void;
   deleteUser: (id: string) => void;
+  addDepartment: (name: string) => void;
+  deleteDepartment: (id: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -16,14 +20,17 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   useEffect(() => {
+    departmentRepository.initialize();
     userRepository.initialize();
-    setUsers(userRepository.getAll());
+    refreshData();
   }, []);
 
-  const refreshUsers = () => {
+  const refreshData = () => {
     setUsers(userRepository.getAll());
+    setDepartments(departmentRepository.getAll());
   };
 
   const login = (user: User) => {
@@ -34,18 +41,39 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentUser(null);
   };
 
-  const addUser = (name: string) => {
-    userRepository.add(name);
-    refreshUsers();
+  const addUser = (name: string, role: 'admin' | 'operator', deptId?: string) => {
+    userRepository.add(name, role, deptId);
+    refreshData();
   };
 
   const deleteUser = (id: string) => {
     userRepository.delete(id);
-    refreshUsers();
+    refreshData();
+  };
+
+  const addDepartment = (name: string) => {
+    departmentRepository.add(name);
+    refreshData();
+  };
+
+  const deleteDepartment = (id: string) => {
+    departmentRepository.delete(id);
+    refreshData();
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, users, login, logout, refreshUsers, addUser, deleteUser }}>
+    <UserContext.Provider value={{ 
+      currentUser, 
+      users, 
+      departments,
+      login, 
+      logout, 
+      refreshData, 
+      addUser, 
+      deleteUser,
+      addDepartment,
+      deleteDepartment
+    }}>
       {children}
     </UserContext.Provider>
   );

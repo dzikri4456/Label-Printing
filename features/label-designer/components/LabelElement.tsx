@@ -13,6 +13,7 @@ interface LabelElementProps {
   displayValue: string; // Pre-calculated display value
   onMouseDown: (e: React.MouseEvent, id: string) => void;
   onResizeMouseDown: (e: React.MouseEvent, id: string) => void;
+  onDoubleClick: (e: React.MouseEvent, id: string) => void;
 }
 
 const LabelElementComponent: React.FC<LabelElementProps> = ({ 
@@ -22,7 +23,8 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
   isBrokenLink,
   displayValue,
   onMouseDown,
-  onResizeMouseDown
+  onResizeMouseDown,
+  onDoubleClick
 }) => {
   // Calculate dimensions
   const leftPx = mmToPx(data.x);
@@ -136,6 +138,7 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
       style={style} 
       className={containerClass}
       onMouseDown={(e) => onMouseDown(e, data.id)}
+      onDoubleClick={(e) => onDoubleClick(e, data.id)}
     >
       {content()}
 

@@ -1,5 +1,5 @@
 export type ElementType = 'text' | 'barcode';
-export type ValueFormat = 'none' | 'currency_idr' | 'currency_usd' | 'date_short' | 'date_long';
+export type ValueFormat = 'none' | 'currency_idr' | 'currency_usd' | 'date_short' | 'date_long' | 'barcode_39';
 
 export interface LabelElementData {
   id: string;

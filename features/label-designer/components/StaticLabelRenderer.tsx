@@ -54,6 +54,7 @@ export const StaticLabelRenderer: React.FC<StaticLabelRendererProps> = ({ templa
           displayValue={getDisplayValue(element)}
           onMouseDown={() => {}}
           onResizeMouseDown={() => {}}
+          onDoubleClick={() => {}}
         />
       ))}
     </div>

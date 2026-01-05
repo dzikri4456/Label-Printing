@@ -17,6 +17,19 @@
   background: #94a3b8;
 }
 
+/* LOCAL BARCODE FONT */
+@font-face {
+  font-family: 'LocalBarcodeFont';
+  /* Assumes user has placed the file in /public/fonts/ */
+  src: url('/fonts/LibreBarcode39-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-barcode {
+  font-family: 'LocalBarcodeFont', sans-serif;
+}
+
 /* 
   STRICT PRINT CSS: ZEBRA ZT510 IMPLEMENTATION
   Follows "Viewport Isolation" and "@page Controller" theories.

@@ -37,6 +37,15 @@ export const formatValue = (value: any, format?: string): string => {
   if (!format || format === 'none') return String(value);
 
   try {
+    // Barcode 39 Formatting
+    if (format === 'barcode_39') {
+      // Code 39 requires start/stop character '*'
+      const str = String(value).toUpperCase();
+      // Ensure we don't double wrap if data already has it
+      if (str.startsWith('*') && str.endsWith('*')) return str;
+      return `*${str}*`;
+    }
+
     // Number Formatting
     if (format === 'currency_idr') {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(value));

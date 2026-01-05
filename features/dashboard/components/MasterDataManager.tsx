@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { productRepository, Product, ProductMetadata } from '../../products/product-repository';
-import { Upload, Database, Trash2, AlertTriangle, CheckCircle, Loader2, FileText, Calendar } from 'lucide-react';
+import { Upload, Database, Trash2, AlertTriangle, CheckCircle, Loader2, FileText, Calendar, Download } from 'lucide-react';
 import { useToast } from '../../ui/ToastContext';
 import { Logger } from '../../../core/logger';
 
@@ -140,7 +140,7 @@ export const MasterDataManager: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            {/* UPLOAD CARD */}
-           <div className="border rounded-xl p-6 hover:border-indigo-300 hover:shadow-md transition-all group">
+           <div className="border rounded-xl p-6 hover:border-indigo-300 hover:shadow-md transition-all group relative">
               <div className="flex items-start justify-between mb-4">
                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                     <Upload className="w-6 h-6" />
@@ -148,11 +148,22 @@ export const MasterDataManager: React.FC = () => {
                  <div className="text-xs font-mono text-slate-400 bg-slate-100 px-2 py-1 rounded">.XLSX</div>
               </div>
               <h3 className="font-bold text-slate-800 text-lg mb-2">Import Database</h3>
-              <p className="text-sm text-slate-500 mb-6">
+              <div className="text-sm text-slate-500 mb-6">
                 Upload a new Excel file to replace the current database. 
                 <br />
-                <strong>Required Columns:</strong> Material, Description, Unit.
-              </p>
+                <span className="mt-2 block">
+                  Don't have a file?
+                  <a 
+                    href="/sample_data.xlsx" 
+                    download="Sample_Data_PLA.xlsx"
+                    className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-bold ml-1 hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Download className="w-3 h-3" />
+                    Download Sample
+                  </a>
+                </span>
+              </div>
               
               <label className={`block w-full text-center py-3 rounded-lg font-bold transition-all cursor-pointer ${isUploading ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'}`}>
                  {isUploading ? (

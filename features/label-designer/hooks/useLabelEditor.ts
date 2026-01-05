@@ -11,7 +11,6 @@ import { useUser } from '../../users/UserContext';
 const generateId = () => `el-${Math.random().toString(36).substr(2, 9)}`;
 
 export const useLabelEditor = () => {
-  // Use Context instead of local state for the Template Data
   const { activeTemplate, updateActiveTemplate } = useTemplateContext();
   const { currentUser } = useUser();
   
@@ -19,37 +18,25 @@ export const useLabelEditor = () => {
       throw new Error("useLabelEditor called without an active template in context");
   }
 
-  // --- PERFORMANCE OPTIMIZATION: REF PATTERN ---
   const templateRef = useRef<LabelTemplate>(activeTemplate);
   useEffect(() => {
     templateRef.current = activeTemplate;
   }, [activeTemplate]);
 
-  // Local UI State
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   
   const { getActiveRow } = useData();
 
-  // REFS for Drag & Resize Logic
   const dragRef = useRef({
     mode: 'move' as 'move' | 'resize',
-    startX: 0,       
-    startY: 0,       
-    originalX: 0,    
-    originalY: 0,
-    originalWidth: 0,
-    originalHeight: 0,    
-    maxX: 0,         
-    maxY: 0          
+    startX: 0, startY: 0, originalX: 0, originalY: 0,
+    originalWidth: 0, originalHeight: 0, maxX: 0, maxY: 0          
   });
-
-  // --- ACTIONS (Now Stable) ---
 
   const updateElement = useCallback((id: string, updates: Partial<LabelElementData>) => {
     const currentTemplate = templateRef.current;
-    
     const el = currentTemplate.elements.find(e => e.id === id);
     if (!el) return;
 
@@ -83,7 +70,7 @@ export const useLabelEditor = () => {
     });
   }, []);
 
-  // --- SMART DROP LOGIC ---
+  // --- SMART DROP LOGIC (Updated for Static & Sys Vars) ---
   const handleDropFromSidebar = useCallback((e: React.DragEvent, canvasRect: DOMRect) => {
     e.preventDefault();
     const dataStr = e.dataTransfer.getData('application/json');
@@ -92,24 +79,51 @@ export const useLabelEditor = () => {
     const currentTemplate = templateRef.current;
     const fieldDef: DataFieldDef = JSON.parse(dataStr);
     
-    // Calculate drop position relative to the Canvas
     const dropX_px = e.clientX - canvasRect.left;
     const dropY_px = e.clientY - canvasRect.top;
     
     let x_mm = pxToMm(dropX_px);
     let y_mm = pxToMm(dropY_px);
-    
-    // Boundary check using current ref
     x_mm = Math.max(0, Math.min(x_mm, currentTemplate.width - 20));
     y_mm = Math.max(0, Math.min(y_mm, currentTemplate.height - 5));
 
-    // SYSTEM TOKEN LOGIC
     let elementValue = `{{${fieldDef.key}}}`;
-    
-    if (fieldDef.key === SYSTEM_KEYS.OPERATOR_NAME) {
+    let isDynamic = true;
+    let specificFontFamily = 'Arial';
+    let specificFontSize = DEFAULTS.ELEMENT.FONT_SIZE;
+    let specificFormat: any = 'none';
+
+    // HANDLER 1: STATIC TEXT TOOL
+    if (fieldDef.key === SYSTEM_KEYS.STATIC_TEXT) {
+       elementValue = "Double Click to Edit";
+       isDynamic = false; // Important: This makes it a standard text box
+    }
+    // HANDLER 2: BARCODE FONT TOOL
+    else if (fieldDef.key === SYSTEM_KEYS.BARCODE_FONT) {
+       elementValue = '{{material}}'; // Default binding to material
+       isDynamic = true;
+       specificFontFamily = 'LocalBarcodeFont';
+       specificFontSize = 48; // Readable size for barcode
+       specificFormat = 'barcode_39';
+       // Re-map binding key to material because that's what the requirement said
+       // But we must check if 'material' exists in schema? Usually it does as core field.
+       fieldDef.key = 'material'; 
+    }
+    // HANDLER 3: SYSTEM VARIABLES
+    else if (fieldDef.key === SYSTEM_KEYS.OPERATOR_NAME) {
        elementValue = SYSTEM_TOKENS.OPERATOR;
     } else if (fieldDef.key === SYSTEM_KEYS.INPUT_QTY) {
-       elementValue = '{{Qty}}'; // User friendly placeholder
+       elementValue = '{{Qty}}';
+    } else if (fieldDef.key === SYSTEM_KEYS.INPUT_REMARKS) {
+       elementValue = '{{Rem}}';
+    } else if (fieldDef.key === SYSTEM_KEYS.INPUT_SALES) {
+       elementValue = '{{SO}}';
+    } else if (fieldDef.key === SYSTEM_KEYS.INPUT_PLAN) {
+       elementValue = '{{Plan}}';
+    } else if (fieldDef.key === SYSTEM_KEYS.VAR_DATE_ONLY) {
+       elementValue = '{{Date}}';
+    } else if (fieldDef.key === SYSTEM_KEYS.VAR_DEPT) {
+       elementValue = '{{Dept}}';
     }
 
     const newElement: LabelElementData = {
@@ -118,12 +132,12 @@ export const useLabelEditor = () => {
       x: x_mm,
       y: y_mm,
       value: elementValue,
-      isDynamic: true,
-      bindingKey: fieldDef.key,
+      isDynamic: isDynamic,
+      bindingKey: isDynamic ? fieldDef.key : undefined, // Only bind if dynamic
       schemaLabel: fieldDef.label, 
-      format: 'none',
-      fontSize: DEFAULTS.ELEMENT.FONT_SIZE,
-      fontFamily: 'Arial',
+      format: (fieldDef.key === SYSTEM_KEYS.VAR_DATE_ONLY) ? 'date_short' : specificFormat,
+      fontSize: specificFontSize,
+      fontFamily: specificFontFamily,
       fontWeight: 'normal',
       width: DEFAULTS.ELEMENT.WIDTH, 
       height: fieldDef.type === 'barcode' ? DEFAULTS.ELEMENT.HEIGHT_BARCODE : DEFAULTS.ELEMENT.HEIGHT_TEXT 
@@ -132,140 +146,114 @@ export const useLabelEditor = () => {
     addElement(newElement);
   }, [addElement]);
 
-  // --- MOUSE HANDLERS (Stable) ---
-
-  const handleCanvasClick = useCallback(() => {
-    setSelectedId((prev) => prev ? null : prev); 
-  }, []);
-
+  // --- MOUSE HANDLERS (Standard) ---
+  const handleCanvasClick = useCallback(() => setSelectedId(prev => prev ? null : prev), []);
+  
   const handleElementMouseDown = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     setSelectedId(id);
-
-    const currentTemplate = templateRef.current;
-    const element = currentTemplate.elements.find(el => el.id === id);
-    if (!element) return;
-
+    const tmpl = templateRef.current;
+    const el = tmpl.elements.find(el => el.id === id);
+    if (!el) return;
     const target = e.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     
-    const elWidthMm = element.width || pxToMm(rect.width);
-    const elHeightMm = element.height || pxToMm(rect.height);
-
     dragRef.current = {
       mode: 'move',
-      startX: e.clientX,
-      startY: e.clientY,
-      originalX: element.x,
-      originalY: element.y,
-      originalWidth: elWidthMm,
-      originalHeight: elHeightMm,
-      maxX: Math.max(0, currentTemplate.width - elWidthMm),
-      maxY: Math.max(0, currentTemplate.height - elHeightMm)
+      startX: e.clientX, startY: e.clientY,
+      originalX: el.x, originalY: el.y,
+      originalWidth: el.width || pxToMm(rect.width),
+      originalHeight: el.height || pxToMm(rect.height),
+      maxX: Math.max(0, tmpl.width - (el.width || pxToMm(rect.width))),
+      maxY: Math.max(0, tmpl.height - (el.height || pxToMm(rect.height)))
     };
     setIsDragging(true);
   }, []); 
 
   const handleResizeMouseDown = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation(); 
-    
-    const currentTemplate = templateRef.current;
-    const element = currentTemplate.elements.find(el => el.id === id);
-    if (!element) return;
-
-    const currentWidth = element.width || 10; 
-    const currentHeight = element.height || 10;
-
+    const tmpl = templateRef.current;
+    const el = tmpl.elements.find(el => el.id === id);
+    if (!el) return;
     dragRef.current = {
       mode: 'resize',
-      startX: e.clientX,
-      startY: e.clientY,
-      originalX: element.x,
-      originalY: element.y,
-      originalWidth: currentWidth,
-      originalHeight: currentHeight,
-      maxX: currentTemplate.width,
-      maxY: currentTemplate.height 
+      startX: e.clientX, startY: e.clientY,
+      originalX: el.x, originalY: el.y,
+      originalWidth: el.width || 10, originalHeight: el.height || 10,
+      maxX: tmpl.width, maxY: tmpl.height 
     };
     setIsDragging(true);
   }, []); 
 
-  // --- GLOBAL EVENT LISTENERS ---
+  // --- NEW: DOUBLE CLICK HANDLER FOR STATIC TEXT ---
+  const handleElementDoubleClick = useCallback((e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (isPreviewMode) return;
+    
+    const currentTemplate = templateRef.current;
+    const el = currentTemplate.elements.find(e => e.id === id);
+    if (!el) return;
+
+    // Only allow editing if it's NOT dynamic (Static Text)
+    if (!el.isDynamic && el.type === 'text') {
+      const newVal = prompt("Edit Label Text:", el.value);
+      if (newVal !== null) {
+        updateElement(id, { value: newVal });
+      }
+    }
+  }, [isPreviewMode, updateElement]);
+
   useEffect(() => {
     if (!isDragging || !selectedId || isPreviewMode) return;
-
     const handleMouseMove = (e: MouseEvent) => {
       const tmpl = templateRef.current;
-      
-      const deltaX_px = e.clientX - dragRef.current.startX;
-      const deltaY_px = e.clientY - dragRef.current.startY;
-      const deltaX_mm = pxToMm(deltaX_px);
-      const deltaY_mm = pxToMm(deltaY_px);
+      const dx_mm = pxToMm(e.clientX - dragRef.current.startX);
+      const dy_mm = pxToMm(e.clientY - dragRef.current.startY);
 
       if (dragRef.current.mode === 'move') {
-        let newX = dragRef.current.originalX + deltaX_mm;
-        let newY = dragRef.current.originalY + deltaY_mm;
-        // Clamp
-        newX = Math.max(0, Math.min(newX, dragRef.current.maxX));
-        newY = Math.max(0, Math.min(newY, dragRef.current.maxY));
-        
-        updateElement(selectedId, { x: newX, y: newY });
+        let nx = dragRef.current.originalX + dx_mm;
+        let ny = dragRef.current.originalY + dy_mm;
+        nx = Math.max(0, Math.min(nx, dragRef.current.maxX));
+        ny = Math.max(0, Math.min(ny, dragRef.current.maxY));
+        updateElement(selectedId, { x: nx, y: ny });
       } else {
-        // Resize Logic
-        let newWidth = Math.max(5, dragRef.current.originalWidth + deltaX_mm); 
-        let newHeight = Math.max(5, dragRef.current.originalHeight + deltaY_mm); 
-
-        if (dragRef.current.originalX + newWidth > tmpl.width) {
-          newWidth = tmpl.width - dragRef.current.originalX;
-        }
-        if (dragRef.current.originalY + newHeight > tmpl.height) {
-          newHeight = tmpl.height - dragRef.current.originalY;
-        }
-
-        updateElement(selectedId, { width: newWidth, height: newHeight });
+        let nw = Math.max(5, dragRef.current.originalWidth + dx_mm); 
+        let nh = Math.max(5, dragRef.current.originalHeight + dy_mm); 
+        if (dragRef.current.originalX + nw > tmpl.width) nw = tmpl.width - dragRef.current.originalX;
+        if (dragRef.current.originalY + nh > tmpl.height) nh = tmpl.height - dragRef.current.originalY;
+        updateElement(selectedId, { width: nw, height: nh });
       }
     };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
+    const handleMouseUp = () => setIsDragging(false);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, selectedId, isPreviewMode, updateElement]);
 
-  // --- KEYBOARD LISTENER ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedId || isPreviewMode) return;
-      const tagName = (e.target as HTMLElement).tagName;
-      if (tagName === 'INPUT' || tagName === 'TEXTAREA') return;
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        deleteElement(selectedId);
-      }
+      if ((e.target as HTMLElement).tagName.match(/INPUT|TEXTAREA/)) return;
+      if (e.key === 'Delete' || e.key === 'Backspace') deleteElement(selectedId);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedId, isPreviewMode, deleteElement]);
 
-  // --- LATE BINDING RESOLUTION (DESIGNER PREVIEW MODE) ---
+  // --- LATE BINDING RESOLUTION (PREVIEW) ---
   const getElementDisplayValue = useCallback((element: LabelElementData): string => {
     if (isPreviewMode && element.isDynamic && element.bindingKey) {
+      if (element.bindingKey === SYSTEM_KEYS.OPERATOR_NAME) return currentUser ? currentUser.name : '[Operator]';
+      if (element.bindingKey === SYSTEM_KEYS.INPUT_QTY) return "100"; 
+      if (element.bindingKey === SYSTEM_KEYS.INPUT_SALES) return "SO-123456";
+      if (element.bindingKey === SYSTEM_KEYS.INPUT_PLAN) return "PLN-99";
+      if (element.bindingKey === SYSTEM_KEYS.INPUT_REMARKS) return "Fragile Item";
+      if (element.bindingKey === SYSTEM_KEYS.VAR_DEPT) return "Production"; // Dummy for designer
+      if (element.bindingKey === SYSTEM_KEYS.VAR_DATE_ONLY) return new Date().toLocaleDateString('en-GB');
       
-      // 1. SYSTEM VARIABLE INTERCEPTOR
-      if (element.bindingKey === SYSTEM_KEYS.OPERATOR_NAME) {
-         return currentUser ? currentUser.name : '[Unknown Operator]';
-      }
-      if (element.bindingKey === SYSTEM_KEYS.INPUT_QTY) {
-         return "100"; // Dummy Preview Value
-      }
-
-      // 2. EXCEL DATA BINDING
       const activeRow = getActiveRow();
       if (activeRow) {
         const rawValue = activeRow[element.bindingKey];
@@ -278,16 +266,7 @@ export const useLabelEditor = () => {
   }, [isPreviewMode, getActiveRow, currentUser]);
 
   return {
-    selectedId,
-    isPreviewMode,
-    updateElement,
-    addElement,
-    deleteElement,
-    togglePreviewMode,
-    handleDropFromSidebar,
-    handleElementMouseDown,
-    handleResizeMouseDown,
-    handleCanvasClick,
-    getElementDisplayValue
+    selectedId, isPreviewMode, updateElement, addElement, deleteElement, togglePreviewMode,
+    handleDropFromSidebar, handleElementMouseDown, handleResizeMouseDown, handleElementDoubleClick, handleCanvasClick, getElementDisplayValue
   };
 };

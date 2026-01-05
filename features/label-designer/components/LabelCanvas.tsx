@@ -10,9 +10,10 @@ interface LabelCanvasProps {
   isPreviewMode: boolean;
   onCanvasClick: () => void;
   onElementMouseDown: (e: React.MouseEvent, id: string) => void;
-  onResizeMouseDown: (e: React.MouseEvent, id: string) => void; // New prop
+  onResizeMouseDown: (e: React.MouseEvent, id: string) => void;
+  onElementDoubleClick: (e: React.MouseEvent, id: string) => void; // New Prop
   onDropFromSidebar: (e: React.DragEvent, canvasRect: DOMRect) => void;
-  getElementDisplayValue: (element: LabelElementData) => string; // Helper
+  getElementDisplayValue: (element: LabelElementData) => string; 
 }
 
 const LabelCanvasComponent: React.FC<LabelCanvasProps> = ({ 
@@ -22,6 +23,7 @@ const LabelCanvasComponent: React.FC<LabelCanvasProps> = ({
   onCanvasClick, 
   onElementMouseDown,
   onResizeMouseDown,
+  onElementDoubleClick,
   onDropFromSidebar,
   getElementDisplayValue
 }) => {
@@ -80,6 +82,7 @@ const LabelCanvasComponent: React.FC<LabelCanvasProps> = ({
               displayValue={getElementDisplayValue(element)}
               onMouseDown={onElementMouseDown}
               onResizeMouseDown={onResizeMouseDown}
+              onDoubleClick={onElementDoubleClick}
             />
           );
         })}

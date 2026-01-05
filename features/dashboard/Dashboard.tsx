@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SavedTemplate, templateRepository } from '../../core/template-repository';
-import { Plus, Layout, Database, PenTool } from 'lucide-react';
+import { Plus, Layout, Database, PenTool, Users } from 'lucide-react';
 import { useToast } from '../ui/ToastContext';
 import { Logger } from '../../core/logger';
 import { TemplateCard } from './components/TemplateCard';
@@ -9,6 +9,7 @@ import { CreateTemplateModal } from './components/CreateTemplateModal';
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
 import { useUser } from '../users/UserContext';
 import { MasterDataManager } from './components/MasterDataManager';
+import { UserManagerModal } from './components/UserManagerModal';
 
 interface DashboardProps {
   onOpenDesigner: (id: string) => void;
@@ -25,6 +26,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
   // UI State
   const [activeTab, setActiveTab] = useState<'templates' | 'data'>('templates');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<SavedTemplate | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -79,15 +81,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Admin Dashboard</h1>
              <p className="text-slate-500 mt-1">Manage print templates and global master data.</p>
           </div>
-          {currentUser?.role === 'admin' && activeTab === 'templates' && (
-            <button 
-              onClick={() => setShowCreateModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95"
-            >
-              <Plus className="w-5 h-5" />
-              New Template
-            </button>
-          )}
+          <div className="flex gap-3">
+             {currentUser?.role === 'admin' && (
+                <button 
+                  onClick={() => setShowUserModal(true)}
+                  className="bg-white text-slate-600 border border-slate-300 px-4 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 transition-all"
+                >
+                  <Users className="w-5 h-5" />
+                  Users
+                </button>
+             )}
+             {currentUser?.role === 'admin' && activeTab === 'templates' && (
+                <button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95"
+                >
+                  <Plus className="w-5 h-5" />
+                  New Template
+                </button>
+             )}
+          </div>
         </div>
 
         {/* TAB NAVIGATION */}
@@ -158,6 +171,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
           isDeleting={isDeleting}
           onConfirm={executeDelete}
           onCancel={() => setTemplateToDelete(null)}
+        />
+        
+        <UserManagerModal
+          isOpen={showUserModal}
+          onClose={() => setShowUserModal(false)}
         />
 
       </div>

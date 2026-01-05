@@ -36,6 +36,7 @@ const LabelDesignerContainer: React.FC<{ onViewDashboard: () => void }> = ({ onV
     togglePreviewMode,
     handleElementMouseDown,
     handleResizeMouseDown,
+    handleElementDoubleClick, // NEW
     handleCanvasClick,
     handleDropFromSidebar,
     getElementDisplayValue
@@ -260,6 +261,7 @@ const LabelDesignerContainer: React.FC<{ onViewDashboard: () => void }> = ({ onV
              onCanvasClick={handleCanvasClick}
              onElementMouseDown={handleElementMouseDown}
              onResizeMouseDown={handleResizeMouseDown}
+             onElementDoubleClick={handleElementDoubleClick} // Pass Handler
              onDropFromSidebar={handleDropFromSidebar}
              getElementDisplayValue={getElementDisplayValue}
            />
