@@ -1,0 +1,1 @@
+Silakan upload file font "LibreBarcode39-Regular.ttf" ke dalam folder ini agar fitur barcode berfungsi dengan baik.
