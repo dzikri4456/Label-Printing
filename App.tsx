@@ -18,6 +18,7 @@ import { Logger } from './core/logger';
 import { UserProvider, useUser } from './features/users/UserContext';
 import { LoginScreen } from './features/users/LoginScreen';
 import { PrintStation } from './features/print-station/PrintStation';
+import { useSessionPersistence, clearSession } from './hooks/useSessionPersistence';
 
 // --- LABEL DESIGNER CONTAINER ---
 const LabelDesignerContainer: React.FC<{ onViewDashboard: () => void }> = ({ onViewDashboard }) => {
@@ -366,6 +367,19 @@ const AppShell: React.FC = () => {
     }
   }, [activeTemplate]);
 
+  // Session persistence - auto-restore last page on refresh
+  useSessionPersistence(
+    viewMode,
+    activeTemplate?.id || null,
+    (savedState) => {
+      // Restore saved state
+      if (savedState.templateId) {
+        setActiveTemplate(savedState.templateId);
+        setViewMode(savedState.viewMode);
+      }
+    }
+  );
+
   // Handler for Dashboard Logic
   const handleOpenDesigner = (id: string) => {
     setActiveTemplate(id);
@@ -380,6 +394,12 @@ const AppShell: React.FC = () => {
   const handleBackToDashboard = () => {
     closeTemplate();
     setViewMode('dashboard');
+  };
+
+  // Clear session on logout
+  const handleLogout = () => {
+    clearSession();
+    logout();
   };
 
   // AUTH GUARD
@@ -403,7 +423,7 @@ const AppShell: React.FC = () => {
         onOpenStation={handleOpenStation}
       />
       <button
-        onClick={logout}
+        onClick={handleLogout}
         className="fixed bottom-6 left-6 z-50 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 font-semibold text-sm flex items-center gap-2"
       >
         <LogOut className="w-4 h-4" />
