@@ -30,13 +30,15 @@ export class ExcelJSService implements IExcelService {
             return { headers: [], data: [] };
         }
 
-        const headers = jsonData[0].map(h => String(h).trim());
+        const headers = (jsonData[0] || []).map(h => String(h || '').trim()).filter(h => h.length > 0);
         const dataRows = jsonData.slice(1);
 
         const structuredData = dataRows.map(row => {
             const obj: Record<string, any> = {};
             headers.forEach((header, idx) => {
-                obj[header] = row[idx] !== undefined ? row[idx] : "";
+                if (header) {
+                    obj[header] = row[idx] !== undefined ? row[idx] : "";
+                }
             });
             return obj;
         });

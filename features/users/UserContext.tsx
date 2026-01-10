@@ -7,6 +7,7 @@ interface UserContextType {
   users: User[];
   departments: Department[];
   login: (user: User) => void;
+  loginAsAdmin: (password: string) => boolean;
   logout: () => void;
   refreshData: () => void;
   addUser: (name: string, role: 'admin' | 'operator', deptId?: string) => void;
@@ -37,6 +38,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentUser(user);
   };
 
+  const loginAsAdmin = (password: string): boolean => {
+    // Get admin password from environment or use default
+    const adminPassword = (import.meta as any).env?.VITE_ADMIN_PASSWORD || 'admin123';
+
+    if (password === adminPassword) {
+      const adminUser: User = {
+        id: 'admin',
+        name: 'IT Administrator',
+        role: 'admin',
+        departmentId: undefined
+      };
+      setCurrentUser(adminUser);
+      return true;
+    }
+    return false;
+  };
+
   const logout = () => {
     setCurrentUser(null);
   };
@@ -62,14 +80,15 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <UserContext.Provider value={{ 
-      currentUser, 
-      users, 
+    <UserContext.Provider value={{
+      currentUser,
+      users,
       departments,
-      login, 
-      logout, 
-      refreshData, 
-      addUser, 
+      login,
+      loginAsAdmin,
+      logout,
+      refreshData,
+      addUser,
       deleteUser,
       addDepartment,
       deleteDepartment

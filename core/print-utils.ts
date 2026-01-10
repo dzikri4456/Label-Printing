@@ -1,5 +1,7 @@
 import { Logger } from './logger';
-import { UNITS } from './constants';
+
+// Conversion constant: 96 DPI / 25.4 mm per inch = 3.779527559055118
+const PX_PER_MM = 3.779527559055118;
 
 /**
  * THE UNIT CONVERSION DOCTRINE
@@ -17,7 +19,7 @@ import { UNITS } from './constants';
  * @returns Pixels (float) - Keeps high precision for CSS engine
  */
 export const mmToPx = (mm: number): number => {
-  return mm * UNITS.PX_PER_MM;
+  return mm * PX_PER_MM;
 };
 
 /**
@@ -26,7 +28,7 @@ export const mmToPx = (mm: number): number => {
  * @returns Millimeters (float)
  */
 export const pxToMm = (px: number): number => {
-  return px / UNITS.PX_PER_MM;
+  return px / PX_PER_MM;
 };
 
 /**
@@ -58,7 +60,7 @@ export const formatValue = (value: any, format?: string): string => {
     if (format === 'date_short' || format === 'date_long') {
       let dateObj: Date;
       // Handle Excel Serial Date
-      if (typeof value === 'number' && value > 20000) { 
+      if (typeof value === 'number' && value > 20000) {
         dateObj = new Date((value - 25569) * 86400 * 1000);
       } else {
         dateObj = new Date(value);
@@ -71,7 +73,7 @@ export const formatValue = (value: any, format?: string): string => {
       }
     }
   } catch (e) {
-    Logger.warn('Formatting failed', e);
+    Logger.warn('Formatting failed', { error: String(e) });
   }
 
   return String(value);

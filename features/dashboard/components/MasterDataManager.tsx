@@ -90,6 +90,56 @@ export const MasterDataManager: React.FC = () => {
     });
   };
 
+  const handleDownloadSample = async () => {
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Sample Data');
+
+      // Add headers
+      worksheet.columns = [
+        { header: 'Material', key: 'material', width: 20 },
+        { header: 'Material Description', key: 'description', width: 40 },
+        { header: 'Base Unit of Measure', key: 'uom', width: 15 }
+      ];
+
+      // Add sample data
+      worksheet.addRows([
+        { material: 'MAT-001', description: 'Steel Pipe 2 inch x 6m', uom: 'PCS' },
+        { material: 'MAT-002', description: 'Bolt M12 x 50mm', uom: 'PCS' },
+        { material: 'MAT-003', description: 'Cable 3x2.5mm NYM', uom: 'MTR' },
+        { material: 'MAT-004', description: 'Paint White Gloss 5L', uom: 'CAN' },
+        { material: 'MAT-005', description: 'Cement Portland 50kg', uom: 'BAG' }
+      ]);
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E7FF' }
+      };
+
+      // Generate buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Sample_Data_PLA.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      addToast('Sample Excel file downloaded successfully', 'success');
+    } catch (err: any) {
+      Logger.error('Sample Excel generation failed', err);
+      addToast('Failed to generate sample file', 'error');
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-bottom-4">
       <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-xl">
@@ -152,15 +202,14 @@ export const MasterDataManager: React.FC = () => {
               <br />
               <span className="mt-2 block">
                 Don't have a file?
-                <a
-                  href="/sample_data.xlsx"
-                  download="Sample_Data_PLA.xlsx"
+                <button
+                  type="button"
+                  onClick={handleDownloadSample}
                   className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-bold ml-1 hover:underline"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <Download className="w-3 h-3" />
                   Download Sample
-                </a>
+                </button>
               </span>
             </div>
 

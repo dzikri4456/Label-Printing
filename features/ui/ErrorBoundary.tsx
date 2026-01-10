@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Logger } from '../../core/logger';
 
@@ -12,7 +12,7 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
+  public override state: State = {
     hasError: false,
     error: null
   };
@@ -21,10 +21,10 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    Logger.error('Uncaught Exception', { 
-      error: error.message, 
-      stack: errorInfo.componentStack 
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    Logger.error('Uncaught Exception', {
+      error: error.message,
+      stack: errorInfo.componentStack
     });
   }
 
@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  public render() {
+  public override render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -45,11 +45,11 @@ export class ErrorBoundary extends Component<Props, State> {
               We encountered an unexpected issue. The error has been logged for our engineering team.
             </p>
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-6 text-left">
-               <code className="text-xs text-slate-600 font-mono break-all">
-                 {this.state.error?.message || "Unknown Error"}
-               </code>
+              <code className="text-xs text-slate-600 font-mono break-all">
+                {this.state.error?.message || "Unknown Error"}
+              </code>
             </div>
-            <button 
+            <button
               onClick={this.handleReload}
               className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200"
             >

@@ -41,7 +41,9 @@ export const parseExcel = async (file: File): Promise<ParseResult> => {
       rawHeaders.forEach((rawHeader, index) => {
         const key = sanitizedHeaders[index];
         // If the cell is empty, store empty string instead of undefined
-        obj[key] = row[rawHeader] !== undefined ? row[rawHeader] : "";
+        if (rawHeader && key) {
+          obj[key] = row[rawHeader] !== undefined ? row[rawHeader] : "";
+        }
       });
       return obj;
     });

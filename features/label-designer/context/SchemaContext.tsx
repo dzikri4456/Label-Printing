@@ -9,7 +9,7 @@ interface SchemaContextType {
   updateField: (id: string, updates: Partial<DataFieldDef>) => void;
   deleteField: (id: string) => void;
   syncFromHeaders: (headers: string[]) => void;
-  replaceSchema: (newFields: DataFieldDef[]) => void; 
+  replaceSchema: (newFields: DataFieldDef[]) => void;
 }
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
@@ -26,19 +26,21 @@ export const SchemaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       // The product repository returns normalized keys (code, name, uom) + any extras
       // We map 'code' -> 'material', 'name' -> 'material_description' to match INITIAL_SCHEMA conventions if possible,
       // or just add them as available fields.
-      
+
       const sample = products[0];
+      if (!sample) return;
+
       const keys = Object.keys(sample);
-      
+
       // We assume product-repository normalizes to: code, name, uom.
       // We map these to the standard SAP keys used in INITIAL_SCHEMA.
       // If we find keys that are NOT in the schema, we add them.
-      
+
       // Standard Mapping
       const mapping: Record<string, string> = {
-          'code': 'material',
-          'name': 'material_description',
-          'uom': 'base_unit_of_measure'
+        'code': 'material',
+        'name': 'material_description',
+        'uom': 'base_unit_of_measure'
       };
 
       const availableKeys = keys.map(k => mapping[k] || k);
@@ -63,14 +65,14 @@ export const SchemaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     // DOCTRINE: System Fields must ALWAYS be present.
     // If the saved template is old, it might miss the system fields.
     // We merge the saved custom fields with the default core/system fields.
-    
+
     // 1. Identify System fields from INITIAL_SCHEMA
     const systemFields = INITIAL_SCHEMA.filter(f => f.isSystem);
     const systemKeys = new Set(systemFields.map(f => f.key));
 
     // 2. Filter incoming fields (remove any duplicates of system fields if they exist)
     const incomingClean = (newFields || []).filter(f => !systemKeys.has(f.key));
-    
+
     // 3. If incoming is empty (new template), just reset to INITIAL
     if (incomingClean.length === 0) {
       setFields(INITIAL_SCHEMA);
@@ -92,10 +94,10 @@ export const SchemaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       headers.forEach(header => {
         // Sanitize for key (e.g. "Batch No" -> "BatchNo")
         const key = sanitizeKey(header);
-        
+
         // Check if key already exists in schema (avoid duplicates)
         const exists = newFields.some(f => f.key.toLowerCase() === key.toLowerCase());
-        
+
         if (!exists) {
           newFields.push({
             id: `auto_${Date.now()}_${addedCount++}`,

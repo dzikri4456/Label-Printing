@@ -26,6 +26,9 @@ export interface ITemplateRepository {
   save(template: Omit<SavedTemplate, 'lastModified'>): SavedTemplate;
   delete(id: string): void;
   initialize(): void;
+  exportTemplate(id: string): void;
+  importTemplate(jsonString: string): SavedTemplate;
+  exportAllTemplates(): void;
 }
 
 /**
@@ -33,7 +36,7 @@ export interface ITemplateRepository {
  * Implements the ITemplateRepository using the browser's synchronous localStorage.
  */
 class LocalStorageTemplateRepository implements ITemplateRepository {
-  
+
   /**
    * Retrieves all templates, sorted by modification date (newest first).
    */
@@ -41,7 +44,7 @@ class LocalStorageTemplateRepository implements ITemplateRepository {
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
       if (!raw) return [];
-      
+
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return [];
 
@@ -67,7 +70,7 @@ class LocalStorageTemplateRepository implements ITemplateRepository {
   public save(template: Omit<SavedTemplate, 'lastModified'>): SavedTemplate {
     const all = this.getAll();
     const existingIndex = all.findIndex(t => t.id === template.id);
-    
+
     const toSave: SavedTemplate = {
       ...template,
       lastModified: Date.now()
@@ -90,6 +93,81 @@ class LocalStorageTemplateRepository implements ITemplateRepository {
     const all = this.getAll();
     const filtered = all.filter(t => t.id !== id);
     this.persist(filtered);
+  }
+
+  /**
+   * Export a single template as JSON file
+   */
+  public exportTemplate(id: string): void {
+    const template = this.getById(id);
+    if (!template) {
+      throw new Error(`Template with id ${id} not found`);
+    }
+
+    const dataStr = JSON.stringify(template, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${template.name.replace(/[^a-z0-9]/gi, '_')}_template.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    Logger.info('Template exported', { id, name: template.name });
+  }
+
+  /**
+   * Export all templates as JSON file
+   */
+  public exportAllTemplates(): void {
+    const templates = this.getAll();
+    if (templates.length === 0) {
+      throw new Error('No templates to export');
+    }
+
+    const dataStr = JSON.stringify(templates, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `all_templates_${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    Logger.info('All templates exported', { count: templates.length });
+  }
+
+  /**
+   * Import a template from JSON string
+   */
+  public importTemplate(jsonString: string): SavedTemplate {
+    try {
+      const parsed = JSON.parse(jsonString);
+
+      // Validate structure
+      if (!parsed.name || !parsed.width || !parsed.height || !Array.isArray(parsed.elements)) {
+        throw new Error('Invalid template format');
+      }
+
+      // Generate new ID to avoid conflicts
+      const newTemplate: SavedTemplate = {
+        ...parsed,
+        id: uuidv4(),
+        name: `${parsed.name} (Imported)`,
+        lastModified: Date.now()
+      };
+
+      return this.save(newTemplate);
+    } catch (e) {
+      Logger.error('Template import failed', e);
+      throw new Error('Failed to import template. Invalid JSON format.');
+    }
   }
 
   /**

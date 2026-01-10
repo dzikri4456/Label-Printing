@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import Barcode from 'react-barcode';
 import { mmToPx } from '../../../core/print-utils';
 import { LabelElementData } from '../types';
@@ -16,9 +16,9 @@ interface LabelElementProps {
   onDoubleClick: (e: React.MouseEvent, id: string) => void;
 }
 
-const LabelElementComponent: React.FC<LabelElementProps> = ({ 
-  data, 
-  isSelected, 
+const LabelElementComponent: React.FC<LabelElementProps> = ({
+  data,
+  isSelected,
   isPreview,
   isBrokenLink,
   displayValue,
@@ -26,28 +26,78 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
   onResizeMouseDown,
   onDoubleClick
 }) => {
+  // Refs for auto-fit content
+  const contentRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate scale to fit content within container
+  const calculateScale = useCallback(() => {
+    if (!contentRef.current || !containerRef.current) return 1;
+
+    const content = contentRef.current;
+    const container = containerRef.current;
+
+    // Get actual content dimensions
+    const contentWidth = content.scrollWidth;
+    const contentHeight = content.scrollHeight;
+
+    // Get container dimensions
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+
+    // Skip if no content or container
+    if (contentWidth === 0 || contentHeight === 0 || containerWidth === 0 || containerHeight === 0) {
+      return 1;
+    }
+
+    // Calculate scale factors
+    const scaleX = containerWidth / contentWidth;
+    const scaleY = containerHeight / contentHeight;
+
+    // Use the smaller scale to ensure content fits in both dimensions
+    // Never scale up (max 1), only scale down
+    const scale = Math.min(scaleX, scaleY, 1);
+
+    return scale;
+  }, []);
+
+  // Apply auto-fit scaling when content or dimensions change
+  useEffect(() => {
+    if (!contentRef.current) return;
+
+    // Small delay to ensure content is rendered
+    const timer = setTimeout(() => {
+      const scale = calculateScale();
+
+      if (contentRef.current) {
+        contentRef.current.style.transform = `scale(${scale})`;
+        contentRef.current.style.transformOrigin = 'top left';
+      }
+    }, 10);
+
+    return () => clearTimeout(timer);
+  }, [displayValue, data.fontSize, data.width, data.height, data.fontFamily, data.fontWeight, calculateScale]);
   // Calculate dimensions
   const leftPx = mmToPx(data.x);
   const topPx = mmToPx(data.y);
-  
+
   // Default dimensions from constants
   const defaultWidth = DEFAULTS.ELEMENT.WIDTH;
   const defaultHeight = data.type === 'barcode' ? DEFAULTS.ELEMENT.HEIGHT_BARCODE : DEFAULTS.ELEMENT.HEIGHT_TEXT;
 
   const widthPx = data.width ? mmToPx(data.width) : mmToPx(defaultWidth);
   const heightPx = data.height ? mmToPx(data.height) : mmToPx(defaultHeight);
-  
+
   const style: React.CSSProperties = {
     position: 'absolute',
     left: `${leftPx}px`,
     top: `${topPx}px`,
     width: `${widthPx}px`,
     height: `${heightPx}px`,
-    textAlign: data.textAlign || 'left',
     lineHeight: 1.2,
     zIndex: isSelected ? 10 : 1,
     cursor: isPreview ? 'default' : 'grab',
-    
+
     // BOUNDING BOX DOCTRINE:
     // Content must be strictly clipped to the box. 
     // Words break if they are too long.
@@ -57,7 +107,7 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
     display: 'flex',
     flexDirection: 'column',
     // For text, we usually align top, but flex allows control if needed later
-    justifyContent: 'flex-start', 
+    justifyContent: 'flex-start',
   };
 
   // Determine Visual Style
@@ -82,20 +132,81 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
     // If link is broken, show icon instead of alias
     if (!isPreview && isBrokenLink) {
       return (
-         <div className="w-full h-full flex items-center justify-center text-red-500 gap-1" title={`Broken Link: {{${data.bindingKey}}}`}>
-            <Unplug className="w-4 h-4" />
-            <span className="text-[10px] font-bold">UNLINKED</span>
-         </div>
+        <div className="w-full h-full flex items-center justify-center text-red-500 gap-1" title={`Broken Link: {{${data.bindingKey}}}`}>
+          <Unplug className="w-4 h-4" />
+          <span className="text-[10px] font-bold">UNLINKED</span>
+        </div>
+      );
+    }
+
+    // LINE ELEMENT RENDERING
+    if (data.type === 'line') {
+      const lineThickness = data.lineThickness || 1;
+      const lineStyle = data.lineStyle || 'solid';
+      const lineColor = data.lineColor || '#000000';
+
+      return (
+        <div
+          className="w-full h-full flex items-center"
+          style={{
+            borderTop: `${lineThickness}px ${lineStyle} ${lineColor}`,
+          }}
+        />
+      );
+    }
+
+    // LABEL/VALUE PAIR RENDERING
+    if (data.type === 'label-value') {
+      const labelText = data.labelText || 'Label';
+      const separator = data.separator || ':';
+      const labelBold = data.labelBold !== false; // Default true
+      const layout = data.layout || 'horizontal';
+
+      return (
+        <div
+          className={`w-full h-full flex ${layout === 'vertical' ? 'flex-col' : 'flex-row items-center'} gap-1`}
+          style={{
+            fontSize: `${data.fontSize || 12}px`,
+            fontFamily: data.fontFamily || 'Helvetica',
+          }}
+        >
+          <span style={{ fontWeight: labelBold ? 'bold' : 'normal' }}>
+            {labelText}{separator}
+          </span>
+          <span style={{ fontWeight: data.fontWeight || 'normal' }}>
+            {displayValue}
+          </span>
+        </div>
+      );
+    }
+
+    // RECTANGLE ELEMENT RENDERING
+    if (data.type === 'rectangle') {
+      const borderWidth = data.borderWidth ?? 2;
+      const borderColor = data.borderColor || '#000000';
+      const borderStyle = data.borderStyle || 'solid';
+      const backgroundColor = data.backgroundColor || 'transparent';
+      const cornerRadius = data.cornerRadius || 0;
+
+      return (
+        <div
+          className="w-full h-full"
+          style={{
+            border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
+            backgroundColor: backgroundColor,
+            borderRadius: `${cornerRadius}px`,
+          }}
+        />
       );
     }
 
     if (data.type === 'barcode') {
       // For barcode, we fit it inside the height
       return (
-        <div className="pointer-events-none w-full h-full flex items-center justify-center"> 
-          <Barcode 
-            value={displayValue} 
-            width={2} 
+        <div className="pointer-events-none w-full h-full flex items-center justify-center">
+          <Barcode
+            value={displayValue}
+            width={2}
             height={heightPx - 10} // Padding subtraction
             format="CODE128"
             displayValue={true}
@@ -104,7 +215,7 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
             textMargin={2}
             fontSize={12}
             margin={0}
-            renderer="svg" 
+            renderer="svg"
             background="transparent"
           />
         </div>
@@ -120,13 +231,16 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
     }
 
     return (
-      <div 
+      <div
+        ref={contentRef}
         style={{
-          fontSize: `${data.fontSize || DEFAULTS.ELEMENT.FONT_SIZE}pt`, 
-          fontFamily: data.fontFamily || 'Arial, sans-serif',
+          fontSize: `${data.fontSize || DEFAULTS.ELEMENT.FONT_SIZE}pt`,
+          fontFamily: data.fontFamily || 'Helvetica, sans-serif',
           fontWeight: data.fontWeight || 'normal',
+          display: 'inline-block',
+          whiteSpace: 'nowrap',
         }}
-        className={`pointer-events-none w-full ${(!isPreview && data.isDynamic) ? 'text-purple-700' : 'text-black'}`}
+        className={`pointer-events-none ${(!isPreview && data.isDynamic) ? 'text-purple-700' : 'text-black'}`}
       >
         {displayValue}
       </div>
@@ -134,8 +248,9 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
   };
 
   return (
-    <div 
-      style={style} 
+    <div
+      ref={containerRef}
+      style={style}
       className={containerClass}
       onMouseDown={(e) => onMouseDown(e, data.id)}
       onDoubleClick={(e) => onDoubleClick(e, data.id)}
@@ -144,7 +259,7 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
 
       {/* Resize Handle (Only in Design Mode & Selected) */}
       {!isPreview && isSelected && (
-        <div 
+        <div
           className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-indigo-500 border border-white rounded-full cursor-se-resize z-20 shadow-sm hover:scale-125 transition-transform"
           onMouseDown={(e) => onResizeMouseDown(e, data.id)}
         />
@@ -167,3 +282,4 @@ export const LabelElement = React.memo(LabelElementComponent, (prev, next) => {
     prev.data === next.data // Strict object reference equality (relies on immutable updates in hook)
   );
 });
+

@@ -10,7 +10,7 @@ interface DataManagerProps {
 }
 
 export const DataManager: React.FC<DataManagerProps> = ({ onClose }) => {
-  const { masterData, headers, loadData, clearData, isLoading } = useData();
+  const { masterData, headers, loadData, clearData } = useData();
   const { syncFromHeaders } = useSchema();
   const [error, setError] = useState<string | null>(null);
 
@@ -21,10 +21,10 @@ export const DataManager: React.FC<DataManagerProps> = ({ onClose }) => {
     try {
       setError(null);
       const result = await parseExcel(file);
-      
+
       // 1. Load Data into Data Context
       loadData(result.headers, result.data);
-      
+
       // 2. Sync Schema (Create buttons for Drag & Drop)
       syncFromHeaders(result.headers);
 
@@ -37,7 +37,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onClose }) => {
   return (
     <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-8">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-        
+
         {/* Header */}
         <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
           <div>
@@ -54,7 +54,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onClose }) => {
 
         {/* Content */}
         <div className="flex-1 overflow-hidden flex flex-col p-6">
-          
+
           {/* Action Bar */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-4">
@@ -63,9 +63,9 @@ export const DataManager: React.FC<DataManagerProps> = ({ onClose }) => {
                 <span className="font-semibold text-sm">Upload Excel (.xlsx)</span>
                 <input type="file" accept=".xlsx" className="hidden" onChange={handleFileUpload} />
               </label>
-              
+
               {masterData.length > 0 && (
-                <button 
+                <button
                   onClick={clearData}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all text-sm font-semibold"
                 >
@@ -90,43 +90,43 @@ export const DataManager: React.FC<DataManagerProps> = ({ onClose }) => {
 
           {/* Data Table Preview */}
           <div className="flex-1 border border-slate-200 rounded-lg overflow-auto relative">
-             {masterData.length === 0 ? (
-               <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                 <FileSpreadsheet className="w-16 h-16 mb-4 opacity-20" />
-                 <p>No data loaded.</p>
-                 <p className="text-xs">Upload an Excel file to see preview here.</p>
-               </div>
-             ) : (
-               <table className="w-full text-sm text-left text-slate-600">
-                 <thead className="text-xs text-slate-700 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
-                   <tr>
-                     <th className="px-6 py-3 border-b">#</th>
-                     {headers.map((h, i) => (
-                       <th key={i} className="px-6 py-3 border-b whitespace-nowrap">{h}</th>
-                     ))}
-                   </tr>
-                 </thead>
-                 <tbody>
-                   {masterData.slice(0, 50).map((row, idx) => (
-                     <tr key={idx} className="bg-white border-b hover:bg-slate-50">
-                       <td className="px-6 py-2 font-mono text-xs text-slate-400">{idx + 1}</td>
-                       {headers.map((h, i) => (
-                         <td key={i} className="px-6 py-2 whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis">
-                            {/* We sanitized the key for binding, but headers array has original names. 
+            {masterData.length === 0 ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                <FileSpreadsheet className="w-16 h-16 mb-4 opacity-20" />
+                <p>No data loaded.</p>
+                <p className="text-xs">Upload an Excel file to see preview here.</p>
+              </div>
+            ) : (
+              <table className="w-full text-sm text-left text-slate-600">
+                <thead className="text-xs text-slate-700 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
+                  <tr>
+                    <th className="px-6 py-3 border-b">#</th>
+                    {headers.map((h, i) => (
+                      <th key={i} className="px-6 py-3 border-b whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {masterData.slice(0, 50).map((row, idx) => (
+                    <tr key={idx} className="bg-white border-b hover:bg-slate-50">
+                      <td className="px-6 py-2 font-mono text-xs text-slate-400">{idx + 1}</td>
+                      {headers.map((h, i) => (
+                        <td key={i} className="px-6 py-2 whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis">
+                          {/* We sanitized the key for binding, but headers array has original names. 
                                 We need to use the original header to lookup data in the row object 
                                 because excel-engine stores it that way. 
                             */}
-                            {row[h] || '-'}
-                         </td>
-                       ))}
-                     </tr>
-                   ))}
-                 </tbody>
-               </table>
-             )}
+                          {row[h] || '-'}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
           {masterData.length > 50 && (
-             <p className="text-xs text-center text-slate-400 mt-2 italic">Showing first 50 rows only.</p>
+            <p className="text-xs text-center text-slate-400 mt-2 italic">Showing first 50 rows only.</p>
           )}
         </div>
       </div>

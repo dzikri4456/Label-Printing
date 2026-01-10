@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, X, FileText, Tag, Maximize2 } from 'lucide-react';
-import { DEFAULTS, PAPER_SIZES, getPaperSizesByCategory, type PaperSize } from '../../../core/constants';
+import { DEFAULTS, getPaperSizesByCategory, type PaperSize } from '../../../core/constants';
 import { Logger } from '../../../core/logger';
 import { SavedTemplate, templateRepository } from '../../../core/template-repository';
 import { v4 as uuidv4 } from 'uuid';
@@ -135,8 +135,8 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
               <button
                 onClick={() => setActiveCategory('label')}
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${activeCategory === 'label'
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
               >
                 <Tag className="w-4 h-4 inline mr-2" />
@@ -145,8 +145,8 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
               <button
                 onClick={() => setActiveCategory('standard')}
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${activeCategory === 'standard'
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
               >
                 <FileText className="w-4 h-4 inline mr-2" />
@@ -161,8 +161,8 @@ export const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                   key={preset.name}
                   onClick={() => handlePresetSelect(preset)}
                   className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-md ${selectedPreset === preset.name
-                      ? 'border-indigo-600 bg-indigo-50 shadow-md'
-                      : 'border-slate-200 hover:border-indigo-300 bg-white'
+                    ? 'border-indigo-600 bg-indigo-50 shadow-md'
+                    : 'border-slate-200 hover:border-indigo-300 bg-white'
                     }`}
                 >
                   <div className="font-bold text-slate-800 text-sm mb-1">{preset.name}</div>

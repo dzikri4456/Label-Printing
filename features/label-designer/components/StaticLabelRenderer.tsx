@@ -18,15 +18,22 @@ export const StaticLabelRenderer: React.FC<StaticLabelRendererProps> = ({ templa
   // --- LATE BINDING INTERCEPTOR ---
   const getDisplayValue = (element: LabelElementData) => {
     if (element.isDynamic && element.bindingKey) {
-      
-      // 1. INTERCEPT SYSTEM VARIABLES
-      // Even though we are printing 100 different rows, this value 
+
+      // 1. INTERCEPT CIPL AUTO-INCREMENT
+      if (element.bindingKey === '__CIPL_AUTO__') {
+        // Use current CIPL number from localStorage (already incremented in PrintStation)
+        const ciplStr = localStorage.getItem('cipl_counter');
+        return ciplStr ? ciplStr : '...';
+      }
+
+      // 2. INTERCEPT SYSTEM VARIABLES
+      // Even though we are printing 100 different rows, this value
       // comes from the active user session, NOT the excel row.
       if (element.bindingKey === SYSTEM_KEYS.OPERATOR_NAME) {
         return currentUser ? currentUser.name : '';
       }
 
-      // 2. RESOLVE EXCEL DATA
+      // 3. RESOLVE EXCEL DATA
       const val = row[element.bindingKey];
       if (val === undefined) return ``;
       return formatValue(val, element.format);
@@ -46,15 +53,15 @@ export const StaticLabelRenderer: React.FC<StaticLabelRendererProps> = ({ templa
       }}
     >
       {template.elements.map((element) => (
-        <LabelElement 
-          key={element.id} 
-          data={element} 
+        <LabelElement
+          key={element.id}
+          data={element}
           isSelected={false}
           isPreview={true} // Always preview mode (no handles)
           displayValue={getDisplayValue(element)}
-          onMouseDown={() => {}}
-          onResizeMouseDown={() => {}}
-          onDoubleClick={() => {}}
+          onMouseDown={() => { }}
+          onResizeMouseDown={() => { }}
+          onDoubleClick={() => { }}
         />
       ))}
     </div>

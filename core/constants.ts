@@ -50,13 +50,14 @@ export const getPaperSizesByCategory = (category: 'standard' | 'label' | 'custom
   return Object.values(PAPER_SIZES).filter(size => size.category === category);
 };
 
-// Helper function to rotate paper size (portrait <-> landscape)
+// Helper function to rotate paper size (swap width and height)
 export const rotatePaperSize = (size: PaperSize): PaperSize => {
   return {
     ...size,
     width: size.height,
     height: size.width,
     name: `${size.name} (Landscape)`,
+    description: size.description ? `${size.description} - Landscape` : undefined
   };
 };
 
@@ -64,46 +65,58 @@ export const rotatePaperSize = (size: PaperSize): PaperSize => {
  * Printer DPI Constants
  */
 export const PRINTER_DPI = {
-  ZEBRA_ZT510_203DPI: 203,
-  ZEBRA_ZT510_300DPI: 300,
-  STANDARD_96DPI: 96,
+  SCREEN: 96,                // Standard screen DPI
+  ZEBRA_ZT510_203DPI: 203,   // Zebra ZT510 printer DPI
+  ZEBRA_ZT510_300DPI: 300,   // Zebra ZT510 printer DPI (high res)
+  ZEBRA_ZT230: 203,          // Zebra ZT230 printer DPI
+  ZEBRA_ZT410: 300,          // Zebra ZT410 printer DPI (high res)
 } as const;
 
 /**
- * Convert millimeters to pixels for specific DPI
+ * Unit Conversion Helpers
  */
-export const mmToPx = (mm: number, dpi: number = PRINTER_DPI.ZEBRA_ZT510_203DPI): number => {
-  // Formula: pixels = (mm / 25.4) * DPI
-  return Math.round((mm / 25.4) * dpi);
+export const mmToPx = (mm: number, dpi: number = PRINTER_DPI.SCREEN): number => {
+  const pxPerMm = (dpi / 25.4);
+  return mm * pxPerMm;
+};
+
+export const pxToMm = (px: number, dpi: number = PRINTER_DPI.SCREEN): number => {
+  const pxPerMm = (dpi / 25.4);
+  return px / pxPerMm;
 };
 
 /**
- * Convert pixels to millimeters for specific DPI
- */
-export const pxToMm = (px: number, dpi: number = PRINTER_DPI.ZEBRA_ZT510_203DPI): number => {
-  // Formula: mm = (pixels / DPI) * 25.4
-  return Math.round(((px / dpi) * 25.4) * 100) / 100; // Round to 2 decimal places
-};
-
-/**
- * Calculate scale factor for print CSS
- * Browser uses 96 DPI, but printer may use different DPI
+ * Get print scale factor for a specific printer
  */
 export const getPrintScaleFactor = (printerDpi: number = PRINTER_DPI.ZEBRA_ZT510_203DPI): number => {
-  return PRINTER_DPI.STANDARD_96DPI / printerDpi;
+  return PRINTER_DPI.SCREEN / printerDpi;
 };
 
 /**
- * Application Defaults
+ * Default Values
  */
 export const DEFAULTS = {
   TEMPLATE: {
     WIDTH: 100,  // mm
     HEIGHT: 50,  // mm
   },
+  ELEMENT: {
+    WIDTH: 40,           // mm
+    HEIGHT_TEXT: 10,     // mm
+    HEIGHT_BARCODE: 25,  // mm
+    FONT_SIZE: 10,       // pt
+  },
   UI: {
     MAX_NAME_LENGTH: 50,
   },
+} as const;
+
+/**
+ * Print Configuration
+ */
+export const PRINT_CONFIG = {
+  BATCH_SIZE: 50,
+  WARNING_THRESHOLD: 100,
 } as const;
 
 /**
@@ -120,6 +133,10 @@ export const STORAGE_KEYS = {
  * Timeouts
  */
 export const TIMEOUTS = {
-  MOCK_API_DELAY: 300,  // ms
-  TOAST_DURATION: 3000, // ms
+  MOCK_API_DELAY: 300,       // ms
+  TOAST_DURATION: 3000,      // ms
+  SAVE_DELAY: 300,           // ms
+  DEBOUNCE_SEARCH: 300,      // ms
+  BATCH_PRINT_CLEANUP: 500,  // ms
+  BATCH_PRINT_DELAY: 100,    // ms
 } as const;
