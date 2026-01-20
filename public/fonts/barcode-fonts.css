@@ -1,0 +1,41 @@
+/* Barcode Fonts */
+
+@font-face {
+  font-family: ''BarCode39'';
+  src: url(''/fonts/BarCode39-Z7DZ.ttf'') format(''truetype'');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: ''BarCode39Lesbar'';
+  src: url(''/fonts/BarCode39Lesbar-3yDM.ttf'') format(''truetype'');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: ''Codabar123'';
+  src: url(''/fonts/Codabar123Le-xXeO.ttf'') format(''truetype'');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: ''Codabar123Lesbar'';
+  src: url(''/fonts/Codabar123LeLesbar-p2dD.ttf'') format(''truetype'');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: ''LibreBarcode39'';
+  src: url(''/fonts/LibreBarcode39-Regular.ttf'') format(''truetype'');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

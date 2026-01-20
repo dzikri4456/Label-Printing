@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SavedTemplate, templateRepository } from '../../core/template-repository';
-import { Plus, Layout, Database, PenTool, Users, Download, Upload } from 'lucide-react';
+import { Plus, Layout, Database, PenTool, Users, Download, Upload, Settings } from 'lucide-react';
 import { useToast } from '../ui/ToastContext';
 import { Logger } from '../../core/logger';
 import { TemplateCard } from './components/TemplateCard';
@@ -12,6 +12,8 @@ import { MasterDataManager } from './components/MasterDataManager';
 import { UserManagerModal } from './components/UserManagerModal';
 import { getLatestMM60Metadata, loadMM60Data } from '../../src/core/firebase/mm60-service';
 import { productRepository } from '../products/product-repository';
+import { CIPLAdminSettings } from '../admin/CIPLAdminSettings';
+import { MM60Uploader } from '../admin/MM60Uploader';
 
 interface DashboardProps {
   onOpenDesigner: (id: string) => void;
@@ -26,7 +28,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
 
   // UI State
-  const [activeTab, setActiveTab] = useState<'templates' | 'data'>('templates');
+  const [activeTab, setActiveTab] = useState<'templates' | 'data' | 'admin'>('templates');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<SavedTemplate | null>(null);
@@ -225,6 +227,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
             <Database className="w-4 h-4" />
             Master Data
           </button>
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab('admin')}
+              className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'admin'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+                }`}
+            >
+              <Settings className="w-4 h-4" />
+              Admin Settings
+            </button>
+          )}
         </div>
 
         {/* CONTENT AREA */}
@@ -251,6 +265,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
               </div>
             )}
           </>
+        ) : activeTab === 'admin' ? (
+          <div className="space-y-8">
+            <CIPLAdminSettings />
+            <MM60Uploader />
+          </div>
         ) : (
           <div className="max-w-4xl">
             <MasterDataManager />

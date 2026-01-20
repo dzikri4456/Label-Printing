@@ -26,8 +26,57 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     departmentRepository.initialize();
     userRepository.initialize();
+
+    // AUTO-LOAD from Firebase
+    autoLoadFromFirebase().catch(err => {
+      console.error('[UserContext] Failed to auto-load from Firebase:', err);
+    });
+
     refreshData();
   }, []);
+
+  const autoLoadFromFirebase = async () => {
+    try {
+      console.log('[UserContext] Auto-loading users and departments from Firebase...');
+
+      // Dynamically import Firebase service
+      const { getAllUsers, getAllDepartments } = await import('../../src/core/firebase/user-service');
+
+      // Load departments first (users depend on departments)
+      const firebaseDepartments = await getAllDepartments();
+      console.log(`[UserContext] Loaded ${firebaseDepartments.length} departments from Firebase`);
+
+      if (firebaseDepartments.length > 0) {
+        // Clear and sync from Firebase directly to localStorage
+        localStorage.removeItem('pla_departments');
+        const deptData = firebaseDepartments.map(d => ({ id: d.id, name: d.name }));
+        localStorage.setItem('pla_departments', JSON.stringify(deptData));
+      }
+
+      // Load users
+      const firebaseUsers = await getAllUsers();
+      console.log(`[UserContext] Loaded ${firebaseUsers.length} users from Firebase`);
+
+      if (firebaseUsers.length > 0) {
+        // Clear and sync from Firebase directly to localStorage
+        localStorage.removeItem('pla_users');
+        const userData = firebaseUsers.map(u => ({
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          departmentId: u.departmentId
+        }));
+        localStorage.setItem('pla_users', JSON.stringify(userData));
+      }
+
+      // Refresh state with new data
+      refreshData();
+      console.log('[UserContext] ✅ Auto-load complete');
+    } catch (error) {
+      console.error('[UserContext] Auto-load failed:', error);
+      // Silent failure - don't block app
+    }
+  };
 
   const refreshData = () => {
     setUsers(userRepository.getAll());

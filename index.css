@@ -79,6 +79,8 @@ body {
 }
 
 /* BARCODE FONTS - Ensure they load for print */
+/* REMOVED: Font file does not exist */
+/*
 @font-face {
   font-family: '3OF9';
   src: url('/fonts/3OF9_NEW.TTF') format('truetype');
@@ -86,8 +88,12 @@ body {
   font-style: normal;
   font-display: block;
   /* Prevent FOUT - critical for print */
+/*
 }
+*/
 
+/* REMOVED: Font file does not exist */
+/*
 @font-face {
   font-family: 'EanBwr';
   src: url('/fonts/EanBwrP72Tt.ttf') format('truetype');
@@ -95,7 +101,10 @@ body {
   font-style: normal;
   font-display: block;
 }
+*/
 
+/* REMOVED: Font file does not exist */
+/*
 @font-face {
   font-family: 'FRE3OF9X';
   src: url('/fonts/FRE3OF9X.TTF') format('truetype');
@@ -103,7 +112,10 @@ body {
   font-style: normal;
   font-display: block;
 }
+*/
 
+/* REMOVED: Font file does not exist */
+/*
 @font-face {
   font-family: 'FREE3OF9';
   src: url('/fonts/FREE3OF9.TTF') format('truetype');
@@ -111,6 +123,7 @@ body {
   font-style: normal;
   font-display: block;
 }
+*/
 
 @font-face {
   font-family: 'LibreBarcode39';
