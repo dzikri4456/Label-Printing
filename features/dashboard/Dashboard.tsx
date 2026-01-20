@@ -13,7 +13,7 @@ import { UserManagerModal } from './components/UserManagerModal';
 import { getLatestMM60Metadata, loadMM60Data } from '../../src/core/firebase/mm60-service';
 import { productRepository } from '../products/product-repository';
 import { CIPLAdminSettings } from '../admin/CIPLAdminSettings';
-import { syncTemplatesFromFirebase, saveTemplateToFirebase, deleteTemplateFromFirebase } from '../../src/core/firebase/template-service';
+import { syncTemplatesFromFirebase } from '../../src/core/firebase/template-service';
 
 interface DashboardProps {
   onOpenDesigner: (id: string) => void;
@@ -160,6 +160,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
       try {
         const text = await file.text();
         const imported = templateRepository.importTemplate(text);
+
+        // Sync to Firebase
+        try {
+          const { saveTemplateToFirebase } = await import('../../src/core/firebase/template-service');
+          await saveTemplateToFirebase(imported);
+          Logger.info(`[Dashboard] Synced imported template "${imported.name}" to Firebase`);
+        } catch (fbError) {
+          Logger.error('[Dashboard] Failed to sync imported template to Firebase', fbError);
+        }
+
         addToast(`Template "${imported.name}" imported successfully`, "success");
         loadTemplates();
       } catch (err: any) {
@@ -177,7 +187,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
         {/* HEADER */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Admin Dashboard</h1>
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+              {currentUser?.role === 'admin' ? 'Admin Dashboard' : 'Template Studio'}
+            </h1>
             <p className="text-slate-500 mt-1">Manage print templates and global master data.</p>
           </div>
           <div className="flex items-center gap-3">
@@ -241,16 +253,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
             <PenTool className="w-4 h-4" />
             Template Studio
           </button>
-          <button
-            onClick={() => setActiveTab('data')}
-            className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'data'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
-          >
-            <Database className="w-4 h-4" />
-            Master Data
-          </button>
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab('data')}
+              className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'data'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+                }`}
+            >
+              <Database className="w-4 h-4" />
+              Master Data
+            </button>
+          )}
           {currentUser?.role === 'admin' && (
             <button
               onClick={() => setActiveTab('admin')}

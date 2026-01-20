@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { SavedTemplate, templateRepository } from '../../../core/template-repository';
+import { saveTemplateToFirebase } from '../../../src/core/firebase/template-service';
+import { Logger } from '../../../core/logger';
 
 interface TemplateContextType {
   activeTemplate: SavedTemplate | null;
-  isDirty: boolean; 
+  isDirty: boolean;
   setActiveTemplate: (id: string) => void;
   updateActiveTemplate: (updates: Partial<SavedTemplate>) => void;
   saveCurrentTemplate: () => void;
@@ -23,7 +25,7 @@ export const TemplateProvider: React.FC<{ children: ReactNode }> = ({ children }
       setActiveTemplateState(tpl);
       // Create snapshot on load for deep comparison
       setInitialSnapshot(JSON.stringify(tpl));
-      setIsDirty(false); 
+      setIsDirty(false);
     } else {
       console.error(`Template with id ${id} not found`);
       setActiveTemplateState(null);
@@ -35,24 +37,34 @@ export const TemplateProvider: React.FC<{ children: ReactNode }> = ({ children }
     setActiveTemplateState(prev => {
       if (!prev) return null;
       const newState = { ...prev, ...updates };
-      
+
       // DEEP COMPARISON LOGIC
       // Compare the serialized new state with the initial snapshot.
       // This ensures we only flag dirty if there are actual content differences.
       const currentString = JSON.stringify(newState);
       setIsDirty(currentString !== initialSnapshot);
-      
+
       return newState;
     });
   }, [initialSnapshot]);
 
-  const saveCurrentTemplate = useCallback(() => {
+  const saveCurrentTemplate = useCallback(async () => {
     if (activeTemplate) {
       const saved = templateRepository.save(activeTemplate);
+
+      // Sync to Firebase
+      try {
+        await saveTemplateToFirebase(saved);
+        Logger.info(`[TemplateContext] Saved template "${saved.name}" to Firebase`);
+      } catch (error) {
+        Logger.error('[TemplateContext] Failed to save to Firebase', error);
+        // Continue anyway - local save succeeded
+      }
+
       // Update snapshot to the newly saved state so subsequent changes are tracked relative to this version
       setInitialSnapshot(JSON.stringify(saved));
       setActiveTemplateState(saved); // Update state to match saved version (e.g. timestamps)
-      setIsDirty(false); 
+      setIsDirty(false);
     }
   }, [activeTemplate]);
 
@@ -64,13 +76,13 @@ export const TemplateProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   return (
-    <TemplateContext.Provider value={{ 
-      activeTemplate, 
+    <TemplateContext.Provider value={{
+      activeTemplate,
       isDirty,
-      setActiveTemplate, 
-      updateActiveTemplate, 
-      saveCurrentTemplate, 
-      closeTemplate 
+      setActiveTemplate,
+      updateActiveTemplate,
+      saveCurrentTemplate,
+      closeTemplate
     }}>
       {children}
     </TemplateContext.Provider>

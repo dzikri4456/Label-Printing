@@ -18,12 +18,12 @@ export async function getAllTemplates(): Promise<SavedTemplate[]> {
             const data = doc.data();
             templates.push({
                 id: doc.id,
-                name: data.name || 'Untitled',
-                width: data.width || 100,
-                height: data.height || 100,
-                elements: data.elements || [],
-                schema: data.schema || [],
-                lastModified: data.lastModified?.toMillis?.() || Date.now()
+                name: data['name'] || 'Untitled',
+                width: data['width'] || 100,
+                height: data['height'] || 100,
+                elements: data['elements'] || [],
+                schema: data['schema'] || [],
+                lastModified: data['lastModified']?.toMillis?.() || Date.now()
             });
         });
 
