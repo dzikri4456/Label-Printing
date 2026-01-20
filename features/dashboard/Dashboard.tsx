@@ -38,9 +38,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
   useEffect(() => {
     templateRepository.initialize();
     productRepository.initialize();
-    loadTemplates();
-    autoLoadMM60DataFromFirebase(); // AUTO-LOAD FROM FIREBASE
-    autoLoadTemplatesFromFirebase(); // AUTO-LOAD TEMPLATES FROM FIREBASE
+
+    // Firebase is the source of truth - load from Firebase first
+    autoLoadTemplatesFromFirebase();
+    autoLoadMM60DataFromFirebase();
   }, []);
 
   const autoLoadMM60DataFromFirebase = async () => {
@@ -81,20 +82,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
 
   const autoLoadTemplatesFromFirebase = async () => {
     try {
-      Logger.info('[Dashboard] Auto-loading templates from Firebase...');
+      Logger.info('[Dashboard] Loading templates from Firebase...');
       const firebaseTemplates = await syncTemplatesFromFirebase();
+
+      // Update state with Firebase data (already synced to localStorage by service)
       setTemplates(firebaseTemplates);
-      Logger.info(`[Dashboard] Loaded ${firebaseTemplates.length} templates from Firebase`);
+      Logger.info(`[Dashboard] ✓ Loaded ${firebaseTemplates.length} templates from Firebase`);
     } catch (error) {
-      Logger.error('[Dashboard] Failed to auto-load templates from Firebase', error);
-      // Fallback to localStorage
+      Logger.error('[Dashboard] Failed to load templates from Firebase', error);
+
+      // Fallback to localStorage only if Firebase fails
+      Logger.warn('[Dashboard] Falling back to localStorage');
       loadTemplates();
     }
   };
 
   const loadTemplates = () => {
-    setTemplates(templateRepository.getAll());
-    Logger.info('Dashboard', { message: 'Templates Loaded' });
+    const localTemplates = templateRepository.getAll();
+    setTemplates(localTemplates);
+    Logger.info(`[Dashboard] Loaded ${localTemplates.length} templates from localStorage`);
   };
 
   const handleCreateSuccess = (newId: string) => {
