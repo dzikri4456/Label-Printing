@@ -10,6 +10,8 @@ import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
 import { useUser } from '../users/UserContext';
 import { MasterDataManager } from './components/MasterDataManager';
 import { UserManagerModal } from './components/UserManagerModal';
+import { getLatestMM60Metadata, loadMM60Data } from '../../src/core/firebase/mm60-service';
+import { productRepository } from '../products/product-repository';
 
 interface DashboardProps {
   onOpenDesigner: (id: string) => void;
@@ -32,8 +34,46 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
 
   useEffect(() => {
     templateRepository.initialize();
+    productRepository.initialize();
     loadTemplates();
+    autoLoadMM60DataFromFirebase(); // AUTO-LOAD FROM FIREBASE
   }, []);
+
+  const autoLoadMM60DataFromFirebase = async () => {
+    try {
+      // Check if localStorage already has data
+      if (productRepository.count() > 0) {
+        Logger.info('[Dashboard] MM60 data already in localStorage, skipping auto-load');
+        return;
+      }
+
+      Logger.info('[Dashboard] Auto-loading MM60 data from Firebase...');
+      const metadata = await getLatestMM60Metadata();
+
+      if (!metadata) {
+        Logger.info('[Dashboard] No MM60 data found in Firebase');
+        return;
+      }
+
+      const data = await loadMM60Data(metadata.id);
+
+      if (data.length > 0) {
+        // Map Firebase data to Product format
+        const products = data.map((row: any) => ({
+          code: row.material || row['Material Number'] || '',
+          name: row.material_description || row['Material Description'] || '',
+          uom: row.base_unit_of_measure || row['Base Unit of Measure'] || '',
+          ...row
+        }));
+
+        productRepository.saveBulk(products, metadata.fileName);
+        Logger.info(`[Dashboard] Auto-loaded ${products.length} products from Firebase`);
+      }
+    } catch (error) {
+      Logger.error('[Dashboard] Failed to auto-load MM60 data', error);
+      // Don't show toast - silent failure is OK
+    }
+  };
 
   const loadTemplates = () => {
     setTemplates(templateRepository.getAll());
@@ -168,8 +208,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
           <button
             onClick={() => setActiveTab('templates')}
             className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'templates'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-indigo-600 text-indigo-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
           >
             <PenTool className="w-4 h-4" />
@@ -178,8 +218,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
           <button
             onClick={() => setActiveTab('data')}
             className={`pb-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'data'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-indigo-600 text-indigo-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
           >
             <Database className="w-4 h-4" />

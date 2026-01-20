@@ -10,19 +10,23 @@ export interface DataFieldDef {
 export const SYSTEM_KEYS = {
   OPERATOR_NAME: '__SYS_OPERATOR_NAME__',
   INPUT_QTY: '__SYS_INPUT_QTY__',
-  // NEW FIELDS
-  INPUT_SALES: '__SYS_INPUT_SALES__',
-  INPUT_PLAN: '__SYS_INPUT_PLAN__',
+  // INPUT FIELDS (User types at print time)
+  INPUT_SO: '__SYS_INPUT_SO__',          // Sales Order (renamed from INPUT_SALES)
+  INPUT_PLAN: '__SYS_INPUT_PLAN__',       // Plan / Batch
+  INPUT_NO_PL: '__SYS_INPUT_NO_PL__',     // No PL (NEW)
+  INPUT_LINE: '__SYS_INPUT_LINE__',       // Line (NEW)
   INPUT_REMARKS: '__SYS_INPUT_REMARKS__', // Keterangan
+  // SYSTEM VARIABLES
   VAR_DEPT: '__SYS_DEPT__',
   VAR_DATE_ONLY: '__SYS_DATE_ONLY__',
-  STATIC_TEXT: '__STATIC_TEXT_TOOL__', // Pseudo-key for tool
-  BARCODE_FONT: '__TOOL_BARCODE_FONT__', // New Barcode Font Tool
-  LINE: '__TOOL_LINE__', // Horizontal Line Tool
-  LABEL_VALUE: '__TOOL_LABEL_VALUE__', // Label/Value Pair Tool
-  RECTANGLE: '__TOOL_RECTANGLE__', // Rectangle/Box Tool
-  TABLE: '__TOOL_TABLE__', // Table/Grid Tool
-  CIPL_AUTO: '__TOOL_CIPL_AUTO__' // CIPL Auto-Increment Tool
+  // TOOLS
+  STATIC_TEXT: '__STATIC_TEXT_TOOL__',
+  BARCODE_FONT: '__TOOL_BARCODE_FONT__',
+  LINE: '__TOOL_LINE__',
+  LABEL_VALUE: '__TOOL_LABEL_VALUE__',
+  RECTANGLE: '__TOOL_RECTANGLE__',
+  TABLE: '__TOOL_TABLE__',
+  CIPL_AUTO: '__TOOL_CIPL_AUTO__'
 };
 
 export const SYSTEM_TOKENS = {
@@ -92,16 +96,23 @@ export const INITIAL_SCHEMA: DataFieldDef[] = [
     isSystem: true
   },
   {
-    id: 'sys_remarks',
-    key: SYSTEM_KEYS.INPUT_REMARKS,
-    label: 'Keterangan (Input)',
+    id: 'sys_so',
+    key: SYSTEM_KEYS.INPUT_SO,
+    label: 'SO (Input)',
     type: 'text',
     isSystem: true
   },
   {
-    id: 'sys_sales',
-    key: SYSTEM_KEYS.INPUT_SALES,
-    label: 'Sales Order (Input)',
+    id: 'sys_no_pl',
+    key: SYSTEM_KEYS.INPUT_NO_PL,
+    label: 'No PL (Input)',
+    type: 'text',
+    isSystem: true
+  },
+  {
+    id: 'sys_line',
+    key: SYSTEM_KEYS.INPUT_LINE,
+    label: 'Line (Input)',
     type: 'text',
     isSystem: true
   },
@@ -109,6 +120,13 @@ export const INITIAL_SCHEMA: DataFieldDef[] = [
     id: 'sys_plan',
     key: SYSTEM_KEYS.INPUT_PLAN,
     label: 'Plan / Batch (Input)',
+    type: 'text',
+    isSystem: true
+  },
+  {
+    id: 'sys_remarks',
+    key: SYSTEM_KEYS.INPUT_REMARKS,
+    label: 'Keterangan (Input)',
     type: 'text',
     isSystem: true
   },

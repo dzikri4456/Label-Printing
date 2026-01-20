@@ -13,4 +13,19 @@ export default defineConfig({
       '@': path.resolve(__dirname, '.'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split React into separate chunk (reduces main bundle)
+          'react-vendor': ['react', 'react-dom'],
+          // Split Firebase into separate chunk (largest dependency ~330KB)
+          'firebase-vendor': ['firebase/app', 'firebase/firestore', 'firebase/auth', 'firebase/storage'],
+          // Split ExcelJS (large library ~200KB)
+          'excel-vendor': ['exceljs']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000 // Increase warning threshold from 500KB to 1000KB
+  }
 });

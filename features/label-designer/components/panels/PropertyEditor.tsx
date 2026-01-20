@@ -152,10 +152,16 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdat
 
             {/* Check if element is using a barcode font */}
             {(() => {
-              // Updated barcode font list - matching new fonts in public/fonts
+              // Complete barcode font list - includes ALL barcode fonts
               const barcodeFontNames = [
+                // FREE3OF9 family (most common)
+                '3OF9',
+                'FREE3OF9',
+                'FRE3OF9X',
+                'EanBwr',
+                // Newer barcode fonts
                 'BarCode39',           // BarCode39-Z7DZ.ttf
-                'BarCode39Lesbar',     // BarCode39Lesbar-3yDM.ttf
+                'BarCode39Lesbar',     // BarCode39Lesbar-3yDM.ttf  
                 'Codabar123',          // Codabar123Le-xXeO.ttf
                 'Codabar123Lesbar',    // Codabar123LeLesbar-p2dD.ttf
                 'LibreBarcode39',      // LibreBarcode39-Regular.ttf

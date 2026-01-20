@@ -138,7 +138,7 @@ export const useLabelEditor = () => {
       elementValue = '{{Qty}}';
     } else if (fieldDef.key === SYSTEM_KEYS.INPUT_REMARKS) {
       elementValue = '{{Rem}}';
-    } else if (fieldDef.key === SYSTEM_KEYS.INPUT_SALES) {
+    } else if (fieldDef.key === SYSTEM_KEYS.INPUT_SO) {
       elementValue = '{{SO}}';
     } else if (fieldDef.key === SYSTEM_KEYS.INPUT_PLAN) {
       elementValue = '{{Plan}}';
@@ -398,7 +398,7 @@ export const useLabelEditor = () => {
     if (isPreviewMode && element.isDynamic && element.bindingKey) {
       if (element.bindingKey === SYSTEM_KEYS.OPERATOR_NAME) return currentUser ? currentUser.name : '[Operator]';
       if (element.bindingKey === SYSTEM_KEYS.INPUT_QTY) return "100";
-      if (element.bindingKey === SYSTEM_KEYS.INPUT_SALES) return "SO-123456";
+      if (element.bindingKey === SYSTEM_KEYS.INPUT_SO) return "SO-123456";
       if (element.bindingKey === SYSTEM_KEYS.INPUT_PLAN) return "PLN-99";
       if (element.bindingKey === SYSTEM_KEYS.INPUT_REMARKS) return "Fragile Item";
       if (element.bindingKey === SYSTEM_KEYS.VAR_DEPT) return "Production";

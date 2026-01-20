@@ -27,7 +27,9 @@ export const PrintStation: React.FC<PrintStationProps> = ({ onBack }) => {
 
   // DYNAMIC INPUT STATE
   const [inputQty, setInputQty] = useState('');
-  const [inputSales, setInputSales] = useState('');
+  const [inputSO, setInputSO] = useState('');
+  const [inputNoPL, setInputNoPL] = useState('');
+  const [inputLine, setInputLine] = useState('');
   const [inputPlan, setInputPlan] = useState('');
   const [inputRemarks, setInputRemarks] = useState('');
 
@@ -45,7 +47,9 @@ export const PrintStation: React.FC<PrintStationProps> = ({ onBack }) => {
     const keys = new Set(activeTemplate.elements.map(e => e.bindingKey));
     return {
       qty: keys.has(SYSTEM_KEYS.INPUT_QTY),
-      sales: keys.has(SYSTEM_KEYS.INPUT_SALES),
+      so: keys.has(SYSTEM_KEYS.INPUT_SO),
+      noPL: keys.has(SYSTEM_KEYS.INPUT_NO_PL),
+      line: keys.has(SYSTEM_KEYS.INPUT_LINE),
       plan: keys.has(SYSTEM_KEYS.INPUT_PLAN),
       remarks: keys.has(SYSTEM_KEYS.INPUT_REMARKS)
     };
@@ -115,7 +119,9 @@ export const PrintStation: React.FC<PrintStationProps> = ({ onBack }) => {
     setSelectedProduct(null);
     setSearchQuery('');
     setInputQty('');
-    setInputSales('');
+    setInputSO('');
+    setInputNoPL('');
+    setInputLine('');
     setInputPlan('');
     setInputRemarks('');
     setSearchResults([]);
@@ -192,7 +198,9 @@ export const PrintStation: React.FC<PrintStationProps> = ({ onBack }) => {
     switch (key) {
       case SYSTEM_KEYS.OPERATOR_NAME: return currentUser?.name || '';
       case SYSTEM_KEYS.INPUT_QTY: return inputQty || '0';
-      case SYSTEM_KEYS.INPUT_SALES: return inputSales || '[Sales Order]';
+      case SYSTEM_KEYS.INPUT_SO: return inputSO || '[SO]';
+      case SYSTEM_KEYS.INPUT_NO_PL: return inputNoPL || '[No PL]';
+      case SYSTEM_KEYS.INPUT_LINE: return inputLine || '[Line]';
       case SYSTEM_KEYS.INPUT_PLAN: return inputPlan || '[Plan]';
       case SYSTEM_KEYS.INPUT_REMARKS: return inputRemarks || '[Remarks]';
       case SYSTEM_KEYS.VAR_DATE_ONLY: return new Date().toLocaleDateString('en-GB'); // dd/mm/yyyy
@@ -201,7 +209,7 @@ export const PrintStation: React.FC<PrintStationProps> = ({ onBack }) => {
         return dept?.name || 'General';
       default: return '';
     }
-  }, [currentUser, departments, inputQty, inputSales, inputPlan, inputRemarks]);
+  }, [currentUser, departments, inputQty, inputSO, inputNoPL, inputLine, inputPlan, inputRemarks]);
 
   const getPreviewDisplayValue = useCallback((element: LabelElementData): string => {
     if (element.isDynamic && element.bindingKey) {
@@ -233,7 +241,9 @@ export const PrintStation: React.FC<PrintStationProps> = ({ onBack }) => {
     material_description: selectedProduct.name,
     base_unit_of_measure: selectedProduct.uom,
     [SYSTEM_KEYS.INPUT_QTY]: inputQty || '0',
-    [SYSTEM_KEYS.INPUT_SALES]: inputSales,
+    [SYSTEM_KEYS.INPUT_SO]: inputSO,
+    [SYSTEM_KEYS.INPUT_NO_PL]: inputNoPL,
+    [SYSTEM_KEYS.INPUT_LINE]: inputLine,
     [SYSTEM_KEYS.INPUT_PLAN]: inputPlan,
     [SYSTEM_KEYS.INPUT_REMARKS]: inputRemarks,
     [SYSTEM_KEYS.OPERATOR_NAME]: currentUser?.name || '',
@@ -358,11 +368,31 @@ export const PrintStation: React.FC<PrintStationProps> = ({ onBack }) => {
                   </div>
                 )}
 
-                {requiredFields.sales && (
+                {requiredFields.so && (
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sales Order</label>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">SO</label>
                     <div className="relative">
-                      <input type="text" value={inputSales} onChange={(e) => setInputSales(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. SO-2023-001" />
+                      <input type="text" value={inputSO} onChange={(e) => setInputSO(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. SO-2023-001" />
+                      <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+                )}
+
+                {requiredFields.noPL && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">No PL</label>
+                    <div className="relative">
+                      <input type="text" value={inputNoPL} onChange={(e) => setInputNoPL(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. 132233333" />
+                      <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+                )}
+
+                {requiredFields.line && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Line</label>
+                    <div className="relative">
+                      <input type="text" value={inputLine} onChange={(e) => setInputLine(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:border-indigo-500 outline-none" placeholder="e.g. Line 1" />
                       <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     </div>
                   </div>
