@@ -48,8 +48,8 @@ export const LoginScreen: React.FC = () => {
 
       <div className="w-full max-w-md z-10 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 shadow-2xl">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Operator Kiosk</h1>
-          <p className="text-slate-400">Select your Department and Profile</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Precision Label</h1>
+          <p className="text-slate-400">Production Label Management System</p>
         </div>
 
         <div className="space-y-6">
@@ -106,7 +106,7 @@ export const LoginScreen: React.FC = () => {
 
         <div className="mt-8 text-center">
           <p className="text-xs text-slate-600">
-            Authorized Personnel Only • v2.1.0 (Kiosk)
+            Authorized Personnel Only • v3.0.0
           </p>
         </div>
       </div>
