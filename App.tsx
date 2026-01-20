@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLabelEditor } from './features/label-designer/hooks/useLabelEditor';
 import { LabelCanvas } from './features/label-designer/components/LabelCanvas';
 import { EditorPanel } from './features/label-designer/components/EditorPanel';
-import { Printer, Eye, PenTool, Save, ArrowLeft, LogOut } from 'lucide-react';
+import { Printer, Eye, PenTool, Save, ArrowLeft } from 'lucide-react';
 import { SchemaProvider, useSchema } from './features/label-designer/context/SchemaContext';
 import { DataProvider, useData } from './features/label-designer/context/DataContext';
 import { TemplateProvider, useTemplateContext } from './features/label-designer/context/TemplateContext';
@@ -417,19 +417,11 @@ const AppShell: React.FC = () => {
   }
 
   return (
-    <div className="relative">
-      <Dashboard
-        onOpenDesigner={handleOpenDesigner}
-        onOpenStation={handleOpenStation}
-      />
-      <button
-        onClick={handleLogout}
-        className="fixed bottom-6 left-6 z-50 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full shadow-lg hover:bg-slate-50 font-semibold text-sm flex items-center gap-2"
-      >
-        <LogOut className="w-4 h-4" />
-        Logout ({currentUser.name})
-      </button>
-    </div>
+    <Dashboard
+      onOpenDesigner={handleOpenDesigner}
+      onOpenStation={handleOpenStation}
+      onLogout={handleLogout}
+    />
   );
 };
 

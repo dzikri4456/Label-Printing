@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SavedTemplate, templateRepository } from '../../core/template-repository';
-import { Plus, Layout, Database, PenTool, Users, Download, Upload, Settings } from 'lucide-react';
+import { Plus, Layout, Database, PenTool, Users, Download, Upload, Settings, LogOut } from 'lucide-react';
 import { useToast } from '../ui/ToastContext';
 import { Logger } from '../../core/logger';
 import { TemplateCard } from './components/TemplateCard';
@@ -13,14 +13,15 @@ import { UserManagerModal } from './components/UserManagerModal';
 import { getLatestMM60Metadata, loadMM60Data } from '../../src/core/firebase/mm60-service';
 import { productRepository } from '../products/product-repository';
 import { CIPLAdminSettings } from '../admin/CIPLAdminSettings';
-import { MM60Uploader } from '../admin/MM60Uploader';
+import { syncTemplatesFromFirebase, saveTemplateToFirebase, deleteTemplateFromFirebase } from '../../src/core/firebase/template-service';
 
 interface DashboardProps {
   onOpenDesigner: (id: string) => void;
   onOpenStation: (id: string) => void;
+  onLogout?: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStation }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStation, onLogout }) => {
   const { addToast } = useToast();
   const { currentUser } = useUser();
 
@@ -39,6 +40,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
     productRepository.initialize();
     loadTemplates();
     autoLoadMM60DataFromFirebase(); // AUTO-LOAD FROM FIREBASE
+    autoLoadTemplatesFromFirebase(); // AUTO-LOAD TEMPLATES FROM FIREBASE
   }, []);
 
   const autoLoadMM60DataFromFirebase = async () => {
@@ -74,6 +76,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
     } catch (error) {
       Logger.error('[Dashboard] Failed to auto-load MM60 data', error);
       // Don't show toast - silent failure is OK
+    }
+  };
+
+  const autoLoadTemplatesFromFirebase = async () => {
+    try {
+      Logger.info('[Dashboard] Auto-loading templates from Firebase...');
+      const firebaseTemplates = await syncTemplatesFromFirebase();
+      setTemplates(firebaseTemplates);
+      Logger.info(`[Dashboard] Loaded ${firebaseTemplates.length} templates from Firebase`);
+    } catch (error) {
+      Logger.error('[Dashboard] Failed to auto-load templates from Firebase', error);
+      // Fallback to localStorage
+      loadTemplates();
     }
   };
 
@@ -165,7 +180,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
             <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Admin Dashboard</h1>
             <p className="text-slate-500 mt-1">Manage print templates and global master data.</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
             {currentUser?.role === 'admin' && (
               <button
                 onClick={() => setShowUserModal(true)}
@@ -201,6 +216,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
                   New Template
                 </button>
               </>
+            )}
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="ml-auto bg-white text-slate-600 border border-slate-300 px-4 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout ({currentUser?.name})
+              </button>
             )}
           </div>
         </div>
@@ -266,9 +290,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
             )}
           </>
         ) : activeTab === 'admin' ? (
-          <div className="space-y-8">
+          <div className="max-w-2xl mx-auto">
             <CIPLAdminSettings />
-            <MM60Uploader />
           </div>
         ) : (
           <div className="max-w-4xl">

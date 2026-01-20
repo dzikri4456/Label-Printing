@@ -234,8 +234,8 @@ const LabelCanvasComponent: React.FC<LabelCanvasProps> = ({
         </div>
       )}
 
-      {/* Zoom Controls */}
-      <div className="absolute bottom-4 right-4 no-print">
+      {/* Zoom Controls - Bottom Left Inside Canvas */}
+      <div className="absolute bottom-6 left-6 no-print z-40">
         <ZoomControls
           zoom={zoom}
           onZoomIn={zoomIn}

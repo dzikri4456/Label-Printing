@@ -103,11 +103,12 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
     // Words break if they are too long.
     overflow: 'hidden',
     wordWrap: 'break-word',
-    // whiteSpace: 'pre-wrap', // Allows wrapping
     display: 'flex',
     flexDirection: 'column',
-    // For text, we usually align top, but flex allows control if needed later
-    justifyContent: 'flex-start',
+    justifyContent: data.textAlign === 'center' ? 'center' :
+      data.textAlign === 'right' ? 'flex-end' : 'flex-start',
+    alignItems: data.textAlign === 'center' ? 'center' :
+      data.textAlign === 'right' ? 'flex-end' : 'flex-start',
   };
 
   // Determine Visual Style
@@ -167,7 +168,7 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
           className={`w-full h-full flex ${layout === 'vertical' ? 'flex-col' : 'flex-row items-center'} gap-1`}
           style={{
             fontSize: `${data.fontSize || 12}px`,
-            fontFamily: data.fontFamily || 'Helvetica',
+            fontFamily: data.fontFamily || 'Arial',
           }}
         >
           <span style={{ fontWeight: labelBold ? 'bold' : 'normal' }}>
@@ -235,10 +236,11 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
         ref={contentRef}
         style={{
           fontSize: `${data.fontSize || DEFAULTS.ELEMENT.FONT_SIZE}pt`,
-          fontFamily: data.fontFamily || 'Helvetica, sans-serif',
+          fontFamily: data.fontFamily || 'Arial',
           fontWeight: data.fontWeight || 'normal',
           display: 'inline-block',
           whiteSpace: 'nowrap',
+          textAlign: data.textAlign || 'left',
         }}
         className={`pointer-events-none ${(!isPreview && data.isDynamic) ? 'text-purple-700' : 'text-black'}`}
       >

@@ -32,7 +32,7 @@ export const useLabelEditor = () => {
   const [gridEnabled, setGridEnabled] = useState(true);
   const [gridSize, setGridSize] = useState(5); // 5mm grid
   const [snapEnabled, setSnapEnabled] = useState(false); // OFF by default for free movement
-  const [rulersEnabled, setRulersEnabled] = useState(true);
+  const [rulersEnabled, setRulersEnabled] = useState(false);
   const [gridToolbarVisible, setGridToolbarVisible] = useState(true); // Toolbar visibility
 
   const { getActiveRow } = useData();
@@ -112,7 +112,7 @@ export const useLabelEditor = () => {
 
     let elementValue = `{{${fieldDef.key}}}`;
     let isDynamic = true;
-    let specificFontFamily = 'Helvetica';
+    let specificFontFamily = 'Arial';
     let specificFontSize: number = DEFAULTS.ELEMENT.FONT_SIZE;
     let specificFormat: any = 'none';
 
@@ -125,8 +125,8 @@ export const useLabelEditor = () => {
     else if (fieldDef.key === SYSTEM_KEYS.BARCODE_FONT) {
       elementValue = '{{material}}';
       isDynamic = true;
-      specificFontFamily = '3OF9';
-      specificFontSize = 48;
+      specificFontFamily = 'LibreBarcode39'; // Use actual barcode font
+      specificFontSize = 72; // Larger for barcode visibility
       specificFormat = 'barcode_39';
       fieldDef.key = 'material';
     }
