@@ -152,21 +152,9 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdat
 
             {/* Check if element is using a barcode font */}
             {(() => {
-              // Complete barcode font list - includes ALL barcode fonts
+              // Only working barcode font
               const barcodeFontNames = [
-                // FREE3OF9 family (most common)
-                '3OF9',
-                'FREE3OF9',
-                'FRE3OF9X',
-                'EanBwr',
-                // Newer barcode fonts
-                'BarCode39',           // BarCode39-Z7DZ.ttf
-                'BarCode39Lesbar',     // BarCode39Lesbar-3yDM.ttf  
-                'Codabar123',          // Codabar123Le-xXeO.ttf
-                'Codabar123Lesbar',    // Codabar123LeLesbar-p2dD.ttf
-                'LibreBarcode39',      // LibreBarcode39-Regular.ttf
-                'LibreBarcode128',     // Keep for compatibility
-                'LibreBarcode128Text'  // Keep for compatibility
+                'LibreBarcode39'       // LibreBarcode39-Regular.ttf - Confirmed working
               ];
               const isUsingBarcodeFont = barcodeFontNames.includes(element.fontFamily || '');
 
@@ -186,7 +174,7 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdat
                     </button>
                     <button
                       type="button"
-                      onClick={() => onUpdate(element.id, { fontFamily: '3OF9' })}
+                      onClick={() => onUpdate(element.id, { fontFamily: 'LibreBarcode39' })}
                       className={`flex-1 px-3 py-2 text-sm font-medium rounded transition-all ${isUsingBarcodeFont
                         ? 'bg-indigo-600 text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -198,9 +186,9 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdat
 
                   {/* Font Dropdown - Shows based on selection */}
                   {isUsingBarcodeFont ? (
-                    // Barcode Font Dropdown
+                    // Barcode Font Dropdown - Only LibreBarcode39 (Working Font)
                     <select
-                      value={element.fontFamily || '3OF9'}
+                      value={element.fontFamily || 'LibreBarcode39'}
                       onChange={(e) => onUpdate(element.id, { fontFamily: e.target.value })}
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                       disabled={fontsLoading}
@@ -209,12 +197,7 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdat
                         <option>Loading fonts...</option>
                       ) : (
                         <>
-                          <option value="BarCode39">BarCode 39</option>
-                          <option value="BarCode39Lesbar">BarCode 39 (Readable)</option>
-                          <option value="Codabar123">Codabar 123</option>
-                          <option value="Codabar123Lesbar">Codabar 123 (Readable)</option>
-                          <option value="LibreBarcode39">Libre Barcode 39</option>
-                          <option value="LibreBarcode128">Libre Barcode 128</option>
+                          <option value="LibreBarcode39">Libre Barcode 39 (Scannable)</option>
                           {barcodeFonts.map((font) => (
                             <option key={font.family} value={font.family}>
                               {font.displayName}
