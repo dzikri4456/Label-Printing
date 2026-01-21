@@ -154,8 +154,25 @@ export const INITIAL_SCHEMA: DataFieldDef[] = [
     isSystem: true
   },
 
-  // --- SECTION D: MASTER DATA ---
-  { id: 'f_mat', key: 'material', label: 'Material Number', type: 'text' },
-  { id: 'f_desc', key: 'material_description', label: 'Material Description', type: 'text' },
-  { id: 'f_uom', key: 'base_unit_of_measure', label: 'Base UoM', type: 'text' },
+  // --- SECTION D: MASTER DATA (MM60 Fields) ---
+  { id: 'f_mat', key: 'Material', label: 'Material', type: 'text' },
+  { id: 'f_desc', key: 'Material Description', label: 'Material Description', type: 'text' },
+  { id: 'f_plant', key: 'Plant', label: 'Plant', type: 'text' },
+  { id: 'f_uom', key: 'Base Unit of Measure', label: 'Base Unit of Measure', type: 'text' },
+  { id: 'f_obj_cat', key: 'Object Category', label: 'Object Category', type: 'text' },
+  { id: 'f_width', key: 'Width "', label: 'Width "', type: 'text' },
+  { id: 'f_family', key: 'Family', label: 'Family', type: 'text' },
+  { id: 'f_series', key: 'Series', label: 'Series', type: 'text' },
+  { id: 'f_short_code', key: 'Short Code', label: 'Short Code', type: 'text' },
+  { id: 'f_design', key: 'Design', label: 'Design', type: 'text' },
+  { id: 'f_skin_type', key: 'Skin Type', label: 'Skin Type', type: 'text' },
+  { id: 'f_hs_code', key: 'Harmonised System Code', label: 'Harmonised System Code', type: 'text' },
+  { id: 'f_hs_desc', key: 'Harmonised System Description', label: 'Harmonised System Description', type: 'text' },
+  { id: 'f_compliance', key: 'Compliance Req.', label: 'Compliance Req.', type: 'text' },
+  { id: 'f_glass_type', key: 'Glass Type', label: 'Glass Type', type: 'text' },
+  { id: 'f_class', key: 'Class', label: 'Class', type: 'text' },
+  { id: 'f_door_type', key: 'Door Type', label: 'Door Type', type: 'text' },
+  { id: 'f_skin_finish', key: 'Skin Finish', label: 'Skin Finish', type: 'text' },
+  { id: 'f_status', key: 'Status', label: 'Status', type: 'text' },
+  { id: 'f_thickness', key: 'Thickness"', label: 'Thickness"', type: 'text' },
 ];

@@ -225,7 +225,13 @@ const LabelElementComponent: React.FC<LabelElementProps> = ({
 
     if (showAlias) {
       return (
-        <div className="w-full h-full text-purple-800 px-1 text-xs font-semibold flex items-center justify-center select-none">
+        <div
+          className="w-full h-full text-purple-800 px-1 text-xs font-semibold flex items-center justify-center select-none"
+          style={{
+            fontFamily: data.fontFamily || 'Arial',
+            fontSize: `${data.fontSize || 12}px`
+          }}
+        >
           [{data.schemaLabel}]
         </div>
       );

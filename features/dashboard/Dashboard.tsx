@@ -13,7 +13,7 @@ import { UserManagerModal } from './components/UserManagerModal';
 import { getLatestMM60Metadata, loadMM60Data } from '../../src/core/firebase/mm60-service';
 import { productRepository } from '../products/product-repository';
 import { CIPLAdminSettings } from '../admin/CIPLAdminSettings';
-import { syncTemplatesFromFirebase } from '../../src/core/firebase/template-service';
+import { syncTemplatesFromFirebase, deleteTemplateFromFirebase } from '../../src/core/firebase/template-service';
 
 interface DashboardProps {
   onOpenDesigner: (id: string) => void;
@@ -122,7 +122,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenDesigner, onOpenStat
 
     try {
       await new Promise(resolve => setTimeout(resolve, TIMEOUTS.MOCK_API_DELAY));
+
+      // Delete from localStorage
       templateRepository.delete(target.id);
+
+      // Sync deletion to Firebase
+      try {
+        await deleteTemplateFromFirebase(target.id);
+        Logger.info(`[Dashboard] Deleted template "${target.name}" from Firebase`);
+      } catch (fbError) {
+        Logger.error('[Dashboard] Failed to delete from Firebase', fbError);
+        // Continue anyway - local deletion succeeded
+      }
+
       addToast("Template deleted successfully", "success");
       setTemplates(prev => prev.filter(t => t.id !== target.id));
       setTemplateToDelete(null);

@@ -80,8 +80,8 @@ export async function syncTemplatesFromFirebase(): Promise<SavedTemplate[]> {
     try {
         const firebaseTemplates = await getAllTemplates();
 
-        // Store in localStorage
-        localStorage.setItem('pla_templates', JSON.stringify(firebaseTemplates));
+        // Store in localStorage using the CORRECT key that template repository uses
+        localStorage.setItem('label_templates', JSON.stringify(firebaseTemplates));
 
         Logger.info(`[Template Service] Synced ${firebaseTemplates.length} templates to localStorage`);
         return firebaseTemplates;

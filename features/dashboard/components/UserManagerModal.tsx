@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useUser } from '../../users/UserContext';
+import { useToast } from '../../ui/ToastContext';
 import { X, Trash2, Briefcase, User, Shield } from 'lucide-react';
 
 interface UserManagerModalProps {
@@ -9,6 +10,7 @@ interface UserManagerModalProps {
 
 export const UserManagerModal: React.FC<UserManagerModalProps> = ({ isOpen, onClose }) => {
   const { users, departments, addUser, deleteUser, addDepartment, deleteDepartment } = useUser();
+  const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<'users' | 'depts'>('users');
 
   // Form State
@@ -22,16 +24,45 @@ export const UserManagerModal: React.FC<UserManagerModalProps> = ({ isOpen, onCl
   const handleAddUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (newUserName.trim()) {
-      addUser(newUserName.trim(), newUserRole, newUserDept || undefined);
-      setNewUserName('');
+      try {
+        addUser(newUserName.trim(), newUserRole, newUserDept || undefined);
+        addToast(`User "${newUserName}" added successfully`, 'success');
+        setNewUserName('');
+        setNewUserDept('');
+      } catch (error) {
+        addToast('Failed to add user', 'error');
+      }
+    }
+  };
+
+  const handleDeleteUser = (userId: string, userName: string) => {
+    try {
+      deleteUser(userId);
+      addToast(`User "${userName}" deleted successfully`, 'success');
+    } catch (error) {
+      addToast('Failed to delete user', 'error');
     }
   };
 
   const handleAddDept = (e: React.FormEvent) => {
     e.preventDefault();
     if (newDeptName.trim()) {
-      addDepartment(newDeptName.trim());
-      setNewDeptName('');
+      try {
+        addDepartment(newDeptName.trim());
+        addToast(`Department "${newDeptName}" created successfully`, 'success');
+        setNewDeptName('');
+      } catch (error) {
+        addToast('Failed to create department', 'error');
+      }
+    }
+  };
+
+  const handleDeleteDept = (deptId: string, deptName: string) => {
+    try {
+      deleteDepartment(deptId);
+      addToast(`Department "${deptName}" deleted successfully`, 'success');
+    } catch (error) {
+      addToast('Failed to delete department', 'error');
     }
   };
 
@@ -91,7 +122,7 @@ export const UserManagerModal: React.FC<UserManagerModalProps> = ({ isOpen, onCl
                         </div>
                       </div>
                     </div>
-                    <button onClick={() => deleteUser(u.id)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDeleteUser(u.id, u.name)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 ))}
               </div>
@@ -114,7 +145,7 @@ export const UserManagerModal: React.FC<UserManagerModalProps> = ({ isOpen, onCl
                       </div>
                       <div className="font-bold text-sm text-slate-700">{d.name}</div>
                     </div>
-                    <button onClick={() => deleteDepartment(d.id)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDeleteDept(d.id, d.name)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 ))}
               </div>

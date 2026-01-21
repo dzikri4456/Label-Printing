@@ -206,8 +206,12 @@ class LocalStorageTemplateRepository implements ITemplateRepository {
     try {
       localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(templates));
     } catch (e) {
-      Logger.error("Repository: Write failed (Storage Full?)", e);
-      throw new Error("Failed to save data. LocalStorage might be full.");
+      if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+        Logger.error("Repository: Storage quota exceeded. LocalStorage is full.", e);
+        throw new Error("Failed to save template. Storage is full. Please clear some data or contact support.");
+      }
+      Logger.error("Repository: Write failed", e);
+      throw new Error("Failed to save data. Please try again.");
     }
   }
 }

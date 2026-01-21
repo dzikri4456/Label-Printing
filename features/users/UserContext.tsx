@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, userRepository } from './user-repository';
 import { Department, departmentRepository } from '../departments/department-repository';
 
+const USER_SESSION_KEY = 'pla_current_user';
+
 interface UserContextType {
   currentUser: User | null;
   users: User[];
@@ -24,6 +26,19 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [departments, setDepartments] = useState<Department[]>([]);
 
   useEffect(() => {
+    // Restore user session first (before other initializations)
+    const savedUser = localStorage.getItem(USER_SESSION_KEY);
+    if (savedUser) {
+      try {
+        const restoredUser = JSON.parse(savedUser);
+        setCurrentUser(restoredUser);
+        console.log('[UserContext] Restored user session:', restoredUser.name);
+      } catch (error) {
+        console.error('[UserContext] Failed to restore user session:', error);
+        localStorage.removeItem(USER_SESSION_KEY);
+      }
+    }
+
     departmentRepository.initialize();
     userRepository.initialize();
 
@@ -85,6 +100,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = (user: User) => {
     setCurrentUser(user);
+    localStorage.setItem(USER_SESSION_KEY, JSON.stringify(user));
+    console.log('[UserContext] User session saved:', user.name);
   };
 
   const loginAsAdmin = (password: string): boolean => {
@@ -99,6 +116,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         departmentId: undefined
       };
       setCurrentUser(adminUser);
+      localStorage.setItem(USER_SESSION_KEY, JSON.stringify(adminUser));
+      console.log('[UserContext] Admin session saved');
       return true;
     }
     return false;
@@ -106,6 +125,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     setCurrentUser(null);
+    localStorage.removeItem(USER_SESSION_KEY);
+    console.log('[UserContext] User session cleared');
   };
 
   const addUser = (name: string, role: 'admin' | 'operator', deptId?: string) => {

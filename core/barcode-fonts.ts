@@ -17,28 +17,44 @@ export interface BarcodeFontInfo {
  */
 export const BUILTIN_BARCODE_FONTS: BarcodeFontInfo[] = [
     {
-        name: 'LocalBarcodeFont',
-        family: 'LocalBarcodeFont',
-        displayName: 'Code 39 (Default)',
-        preview: '*BARCODE123*',
+        name: 'BarCode39',
+        family: 'BarCode39',
+        displayName: 'Code 39',
+        preview: '*123456*',
+        type: 'code39',
+        isAvailable: true,
+    },
+    {
+        name: 'BarCode39Lesbar',
+        family: 'BarCode39Lesbar',
+        displayName: 'Code 39 (Readable)',
+        preview: '*ABC123*',
         type: 'code39',
         isAvailable: true,
     },
     {
         name: 'LibreBarcode39',
-        family: 'Libre Barcode 39',
+        family: 'LibreBarcode39',
         displayName: 'Libre Barcode 39',
         preview: '*SAMPLE*',
         type: 'code39',
-        isAvailable: false, // Will be detected
+        isAvailable: true,
     },
     {
-        name: 'LibreBarcode128',
-        family: 'Libre Barcode 128',
-        displayName: 'Libre Barcode 128',
-        preview: 'SAMPLE123',
-        type: 'code128',
-        isAvailable: false,
+        name: 'Codabar123',
+        family: 'Codabar123',
+        displayName: 'Codabar',
+        preview: 'A123456B',
+        type: 'custom',
+        isAvailable: true,
+    },
+    {
+        name: 'Codabar123Lesbar',
+        family: 'Codabar123Lesbar',
+        displayName: 'Codabar (Readable)',
+        preview: 'A123456B',
+        type: 'custom',
+        isAvailable: true,
     },
 ];
 

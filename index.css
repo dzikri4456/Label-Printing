@@ -69,61 +69,26 @@ body {
   background: #94a3b8;
 }
 
-/* LOCAL BARCODE FONT */
-@font-face {
-  font-family: 'LocalBarcodeFont';
-  /* Assumes user has placed the file in /public/fonts/ */
-  src: url('/fonts/LibreBarcode39-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
+/* ========================================
+   BARCODE FONTS - All Available Fonts
+   ======================================== */
 
-/* BARCODE FONTS - Ensure they load for print */
-/* REMOVED: Font file does not exist */
-/*
+/* Code 39 Fonts */
 @font-face {
-  font-family: '3OF9';
-  src: url('/fonts/3OF9_NEW.TTF') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
-  /* Prevent FOUT - critical for print */
-/*
-}
-*/
-
-/* REMOVED: Font file does not exist */
-/*
-@font-face {
-  font-family: 'EanBwr';
-  src: url('/fonts/EanBwrP72Tt.ttf') format('truetype');
+  font-family: 'BarCode39';
+  src: url('/fonts/BarCode39-Z7DZ.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
 }
-*/
 
-/* REMOVED: Font file does not exist */
-/*
 @font-face {
-  font-family: 'FRE3OF9X';
-  src: url('/fonts/FRE3OF9X.TTF') format('truetype');
+  font-family: 'BarCode39Lesbar';
+  src: url('/fonts/BarCode39Lesbar-3yDM.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
 }
-*/
-
-/* REMOVED: Font file does not exist */
-/*
-@font-face {
-  font-family: 'FREE3OF9';
-  src: url('/fonts/FREE3OF9.TTF') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
-}
-*/
 
 @font-face {
   font-family: 'LibreBarcode39';
@@ -133,8 +98,33 @@ body {
   font-display: block;
 }
 
+/* Codabar Fonts */
+@font-face {
+  font-family: 'Codabar123';
+  src: url('/fonts/Codabar123Le-xXeO.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Codabar123Lesbar';
+  src: url('/fonts/Codabar123LeLesbar-p2dD.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+/* Legacy Alias for Backward Compatibility */
+@font-face {
+  font-family: 'LocalBarcodeFont';
+  src: url('/fonts/LibreBarcode39-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .font-barcode {
-  font-family: 'LocalBarcodeFont', sans-serif;
+  font-family: 'BarCode39', 'LibreBarcode39', monospace;
 }
 
 /* 
