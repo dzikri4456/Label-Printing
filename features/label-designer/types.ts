@@ -21,6 +21,7 @@ export interface LabelElementData {
   fontFamily?: string;
   fontWeight?: 'normal' | 'bold';
   textAlign?: 'left' | 'center' | 'right';
+  barcodeFormat?: 'CODE39' | 'CODE128' | 'EAN13' | 'UPC'; // For barcode type elements (SVG)
 
   // Line-specific properties
   lineThickness?: number; // in px (1-5)

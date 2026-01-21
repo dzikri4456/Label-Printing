@@ -2,7 +2,6 @@ import React from 'react';
 import { Type, Barcode as BarcodeIcon, Trash2, Database, Lock } from 'lucide-react';
 import { LabelElementData, ValueFormat } from '../../types';
 import { BufferedInput } from '../BufferedInput';
-import { useBarcodeFonts } from '../../../../core/barcode-fonts';
 
 interface PropertyEditorProps {
   element: LabelElementData;
@@ -11,7 +10,6 @@ interface PropertyEditorProps {
 }
 
 export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdate, onDelete }) => {
-  const { fonts: barcodeFonts, loading: fontsLoading } = useBarcodeFonts();
 
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -146,88 +144,26 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdat
           </div>
 
 
-          {/* Font Family - Separate Buttons for Regular and Barcode Fonts */}
+          {/* Font Family - Regular Fonts Only */}
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Font Selection</label>
-
-            {/* Check if element is using a barcode font */}
-            {(() => {
-              // Only working barcode font
-              const barcodeFontNames = [
-                'LibreBarcode39'       // LibreBarcode39-Regular.ttf - Confirmed working
-              ];
-              const isUsingBarcodeFont = barcodeFontNames.includes(element.fontFamily || '');
-
-              return (
-                <div className="space-y-2">
-                  {/* Button Toggle */}
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onUpdate(element.id, { fontFamily: 'Arial' })}
-                      className={`flex-1 px-3 py-2 text-sm font-medium rounded transition-all ${!isUsingBarcodeFont
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                      Font Biasa
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onUpdate(element.id, { fontFamily: 'LibreBarcode39' })}
-                      className={`flex-1 px-3 py-2 text-sm font-medium rounded transition-all ${isUsingBarcodeFont
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                      Font Barcode
-                    </button>
-                  </div>
-
-                  {/* Font Dropdown - Shows based on selection */}
-                  {isUsingBarcodeFont ? (
-                    // Barcode Font Dropdown - Only LibreBarcode39 (Working Font)
-                    <select
-                      value={element.fontFamily || 'LibreBarcode39'}
-                      onChange={(e) => onUpdate(element.id, { fontFamily: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                      disabled={fontsLoading}
-                    >
-                      {fontsLoading ? (
-                        <option>Loading fonts...</option>
-                      ) : (
-                        <>
-                          <option value="LibreBarcode39">Libre Barcode 39 (Scannable)</option>
-                          {barcodeFonts.map((font) => (
-                            <option key={font.family} value={font.family}>
-                              {font.displayName}
-                            </option>
-                          ))}
-                        </>
-                      )}
-                    </select>
-                  ) : (
-                    // Regular Font Dropdown
-                    <select
-                      value={element.fontFamily || 'Arial'}
-                      onChange={(e) => onUpdate(element.id, { fontFamily: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="Arial">Arial</option>
-                      <option value="Helvetica">Helvetica</option>
-                      <option value="Times New Roman">Times New Roman</option>
-                      <option value="Courier New">Courier New</option>
-                      <option value="Georgia">Georgia</option>
-                      <option value="Verdana">Verdana</option>
-                      <option value="Tahoma">Tahoma</option>
-                      <option value="Trebuchet MS">Trebuchet MS</option>
-                      <option value="Impact">Impact</option>
-                      <option value="Comic Sans MS">Comic Sans MS</option>
-                    </select>
-                  )}
-                </div>
-              );
-            })()}
+            <select
+              value={element.fontFamily || 'Arial'}
+              onChange={(e) => onUpdate(element.id, { fontFamily: e.target.value })}
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="Arial">Arial</option>
+              <option value="Helvetica">Helvetica</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Verdana">Verdana</option>
+              <option value="Tahoma">Tahoma</option>
+              <option value="Trebuchet MS">Trebuchet MS</option>
+              <option value="Impact">Impact</option>
+              <option value="Comic Sans MS">Comic Sans MS</option>
+            </select>
+            <p className="text-[10px] text-slate-400 mt-1">For scannable barcodes, use Barcode element type</p>
           </div>
 
 
@@ -250,42 +186,31 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({ element, onUpdat
       {/* Barcode-specific properties */}
       {element.type === 'barcode' && (
         <div className="bg-slate-50 p-3 rounded-md border border-slate-200 space-y-3">
+          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wide">Barcode Settings (SVG)</h4>
+
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Barcode Font</label>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Barcode Format</label>
             <select
-              value={element.fontFamily || '3OF9'}
-              onChange={(e) => onUpdate(element.id, { fontFamily: e.target.value })}
+              value={element.barcodeFormat || 'CODE39'}
+              onChange={(e) => onUpdate(element.id, { barcodeFormat: e.target.value as 'CODE39' | 'CODE128' | 'EAN13' | 'UPC' })}
               className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-              disabled={fontsLoading}
             >
-              {fontsLoading ? (
-                <option>Loading fonts...</option>
-              ) : (
-                <>
-                  <option value="FREE3OF9">FREE3OF9 (Code 39)</option>
-                  <option value="3OF9">3OF9 (Code 39)</option>
-                  <option value="FRE3OF9X">FRE3OF9X (Extended)</option>
-                  <option value="EanBwr">EAN Barcode</option>
-                  <option value="LibreBarcode39">Libre Barcode 39</option>
-                  {barcodeFonts.map((font) => (
-                    <option key={font.family} value={font.family}>
-                      {font.displayName}
-                    </option>
-                  ))}
-                </>
-              )}
+              <option value="CODE39">CODE 39 (Most Compatible)</option>
+              <option value="CODE128">CODE 128 (High Density)</option>
+              <option value="EAN13">EAN-13 (Retail)</option>
+              <option value="UPC">UPC (Universal Product)</option>
             </select>
             <p className="text-[10px] text-slate-400 mt-1">
-              {fontsLoading ? 'Detecting fonts...' : `${5 + barcodeFonts.length} barcode font(s) available`}
+              SVG-based barcode - guaranteed scannable
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Size (pt)</label>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Height (mm)</label>
             <BufferedInput
-              value={element.fontSize || 48}
-              onCommit={(val) => onUpdate(element.id, { fontSize: val })}
-              min={12}
+              value={element.height || 15}
+              onCommit={(val) => onUpdate(element.id, { height: Math.max(10, val) })}
+              min={10}
               className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm outline-none"
             />
           </div>
